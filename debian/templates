@@ -1,6 +1,6 @@
 Template: apt-upchk/mailto
 Type: text
-_Description: Input admin mail address:
+Description: Input admin mail address
  Input address that will receive the report of update packages.
  You can assign multiple address that was separated with white space.
 

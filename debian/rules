@@ -64,6 +64,8 @@ install: build
 	mkdir -p $(TARGETDIR)/usr/share/apt-upchk/scripts
 	install src/* debian/update-settings \
 	  $(TARGETDIR)/usr/share/apt-upchk/scripts
+	install -m 644 debian/update-settings \
+	  $(TARGETDIR)/usr/share/apt-upchk/scripts
 	mkdir -p $(TARGETDIR)/usr/share/apt-upchk
 	cp -a lib $(TARGETDIR)/usr/share/apt-upchk
 	mkdir -p $(TARGETDIR)/var/lib/apt-upchk

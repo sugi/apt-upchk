@@ -21,7 +21,21 @@ case "$1" in
     configure)
       id aptupchk > /dev/null 2>&1 || adduser --system --no-create-home --disabled-password aptupchk
       chown aptupchk -R /var/lib/apt-upchk/workroot
-      /usr/share/apt-uphck/scripts/update-settings || ture
+
+      notifyconf=/etc/notify.conf
+
+      if ( test ! -r $notifyconf || grep -q "DO NOT MODIFY" $notifyconf); then
+        . /usr/share/debconf/confmodule
+
+        echo "# AUTOMATICALLY GENARATED. DO NOT MODIFY THIS." > $notifyconf
+        echo "# If you want to change, use 'dpkg-reconfigure apt-uphck'." >> $notifyconf
+
+         db_get apt-upchk/mailto
+         echo "mailto=\"$RET\"" >> $notifyconf
+
+       else
+         echo "$notifyconf has been modified manually? skipping configure." >&2
+       fi
 
     ;;
 
