@@ -2,16 +2,21 @@
 # -*- cperl -*-
 package main;
 use lib "/usr/share/apt-upchk/lib";
-use AptUpchk::Report::SingleHost;
 
 if (__FILE__ eq $0) {
     use strict;
     use warnings;
     use XML::DOM;
+    my $report_class = "AptUpchk::Report::SingleHost";
+
+    if ($ARGV[0] && ($ARGV[0] eq "-m" || $ARGV[0] eq "--mail")) {
+	$report_class =  "AptUpchk::Report::Mail"
+    }
+    eval "use $report_class";
 
     our %opt = (config => @ARGV && $ARGV[0] || "/etc/apt-upchk/report.conf",
-		"ignore-name" => [],
-		"ignore-type" => []);
+		"exclude-byname" => [],
+		);
     if ( -r $opt{config} ) {
 	do $opt{config};
 	die "Error in config file: $@\n" if $@;
@@ -19,10 +24,9 @@ if (__FILE__ eq $0) {
 
     my $exitcode = 0;
     my $dom = XML::DOM::Parser->new->parse(*STDIN);
-    my $rep = AptUpchk::Report::SingleHost->new(doc => $dom,
-						"ignore-type"=>$opt{"ignore-type"},
-					        "ignore-name"=>$opt{"ignore-name"},
-					       );
+    my $rep = $report_class->new(doc => $dom,
+			        "exclude-byname"=>$opt{"exclude-byname"},
+			       );
 
     $rep->report and $exitcode = 100;
 

@@ -28,7 +28,7 @@ case "$1" in
       if ( test ! -r $notifyconf || grep -q "DO NOT MODIFY" $notifyconf); then
 
         echo "# AUTOMATICALLY GENARATED. DO NOT MODIFY THIS." > $notifyconf
-        echo "# If you want to change, use 'dpkg-reconfigure apt-uphck'." >> $notifyconf
+        echo "# If you want to change, use 'dpkg-reconfigure apt-upchk'." >> $notifyconf
 
          db_get apt-upchk/mailto
          echo "mailto=\"$RET\"" >> $notifyconf

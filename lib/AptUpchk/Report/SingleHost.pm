@@ -13,7 +13,11 @@ sub new {
     my $self;
     my @opt = @_;
     @opt = (doc => shift) if (@_ == 1);
-    $self = {"ignore-type" => [], "ignore-name" =>[],
+    $self = {"exclude-hold"     => 0,
+	     "exclude-normal"   => 0,
+	     "exclude-security" => 0,
+	     "exclude-update-error"=> 1,
+	     "exclude-byname"   => [],
 	     @opt};
     unless (exists $self->{output}) {
 	$self->{output} = IO::File->new(">-");
@@ -25,20 +29,18 @@ sub _scan_updates {
     my $self = shift;
     my (@security, @update);
     my ($pkg);
-    my %ignore_t;
-    @ignore_t{@{$self->{"ignore-type"}}}=();
 
   PKG:
     foreach $pkg ( $self->{doc}->xql("/apt-upchk-report/updatepkg") ) {
-	foreach my $i ( @{$self->{"ignore-name"}} ) {
+	foreach my $i ( @{$self->{"exclude-byname"}} ) {
 	    [__get_first_data($pkg->xql("./name"))]->[0] =~ /^${i}$/i and next PKG;
 	}
 
 	if ( [__get_first_data($pkg->xql("./release"))]->[0] =~ /-security:/i ) {
-	    next if exists $ignore_t{"security"};
+	    next if $self->{"exclude-security"};
 	    push @security, $pkg;
 	} else {
-	    next if exists $ignore_t{"normal"};
+	    next if exists $self->{"exclude-normal"};
 	    push @update, $pkg;
 	}
     }
@@ -51,14 +53,12 @@ sub _scan_updates {
 sub _get_hold_pkg {
     my $self = shift;
     my @pkg;
-    my %ignore_t;
-    @ignore_t{@{$self->{"ignore-type"}}}=();
-    return @pkg if exists $ignore_t{"hold"};
+    return @pkg if $self->{"exclude-hold"};
 
     unless (exists $self->{pkgcache}->{hold}) {
       PKG:
 	foreach my $pkg ( $self->{doc}->xql("/apt-upchk-report/keptbackpkg") ){
-	    foreach my $i ( @{$self->{"ignore-name"}} ) {
+	    foreach my $i ( @{$self->{"exclude-byname"}} ) {
 		[__get_first_data($pkg->xql("./name"))]->[0] =~ /^${i}$/i and next PKG;
 
 	     }
@@ -83,12 +83,12 @@ sub _get_security_pkg {
 
 sub _get_update_exitcode {
     my $self = shift;
-    [__get_first_data($self->{doc}->xql("/apt-upchk-report/update-command/exitcode"))]->[0];
+    __get_first_data($self->{doc}->xql("/apt-upchk-report/update-command/exitcode"));
 }
 
 sub _get_update_output {
     my $self = shift;
-    [__get_first_data($self->{doc}->xql("/apt-upchk-report/update-command/output"))]->[0];
+    __get_first_data($self->{doc}->xql("/apt-upchk-report/update-command/output"));
 }
 
 sub report {
@@ -103,9 +103,7 @@ sub report {
 
 sub report_update_err {
     my $self = shift;
-    my %ignore_t;
-    @ignore_t{@{$self->{"ignore-type"}}}=();
-    return 0 if exists $ignore_t{"update-error"};
+    return 0 if $self->{"exclude-update-error"};
 
     my $err;
     if ( ($err = $self->_get_update_exitcode) != 0 ) {
