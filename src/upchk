@@ -66,7 +66,7 @@ my $upgrade_ret = $?;
 		    $kept_p = 0;
 		}
 	    }
-	    elsif (/^The following package have been kept back/){
+	    elsif (/^The following packages have been kept back/){
 		$kept_p = 1;
 		$exitcode = 50;
 	    }
