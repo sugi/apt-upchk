@@ -1,16 +1,16 @@
 #!/bin/bash
 
+scriptdir=/usr/share/apt-upchk/scripts
 test -r /etc/apt-upchk/notify.conf && . /etc/apt-upchk/notify.conf
 : ${mailto:=root}
 : ${mode=master}
 
-upchk="`/usr/share/apt-upchk/scripts/upchk`"
+upchkout="`${scriptdir}/upchk`"
+test "$?" == "0" && exit 0
 
-if [ "$mode" == "master" ]; then
-  upchk=$(echo "$upchk" | /usr/share/apt-upchk/scripts/genreport)
-  test -z "$upchk" && exit 0
-else
-  (echo "upchk" | egrep -q "(<updatepkg>|<keptbackpkg>)") || exit 0
+if [ "$mode" == "single" ]; then
+  upchk=$(echo "$upchkout" | ${scriptdir}/report)
+  test "$?" == "0" && exit 0
 fi
 
 echo "Subject: [`hostname -s`] Updated Package Available
@@ -18,5 +18,5 @@ X-Sender: apt-upchk-notify (`hostname -s`)
 Content-Type: text/plain; charset=us-ascii
 To: `echo "${mailto}" | sed -e 's/^  *//; s/  *$//; s/  */, /g'`
 
-$upchk
+$upchkout
 " | /usr/sbin/sendmail $mailto
