@@ -4,10 +4,10 @@ test -r /etc/apt-upchk/notify.conf && . /etc/apt-upchk/notify.conf
 : ${mailto:=root}
 : ${mode=master}
 
-upchk="`/usr/share/apt-upchk/scripts/apt-upchk`"
+upchk="`/usr/share/apt-upchk/scripts/upchk`"
 
 if [ "$mode" == "master" ]; then
-  upchk=$(echo "$upchk" | /usr/share/apt-upchk/scripts/apt-upchk-genreport)
+  upchk=$(echo "$upchk" | /usr/share/apt-upchk/scripts/genreport)
   test -z "$upchk" && exit 0
 else
   (echo "upchk" | egrep -q "(<updatepkg>|<keptbackpkg>)") || exit 0

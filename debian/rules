@@ -62,10 +62,7 @@ install: build
 	mkdir -p $(TARGETDIR)/etc/apt-upchk
 	cp -a etc/* $(TARGETDIR)/etc/apt-upchk
 	mkdir -p $(TARGETDIR)/usr/share/apt-upchk/scripts
-	install src/apt-simulate $(TARGETDIR)/usr/share/apt-upchk/scripts
-	install src/genreport $(TARGETDIR)/usr/share/apt-upchk/scripts
-	install src/apt-upchk src/apt-upchk-notify \
-	  $(TARGETDIR)/usr/share/apt-upchk/scripts
+	install src/* $(TARGETDIR)/usr/share/apt-upchk/scripts
 	mkdir -p $(TARGETDIR)/var/lib/apt-upchk
 	cp -a workroot $(TARGETDIR)/var/lib/apt-upchk
 	ln -s /etc/apt/sources.list \
