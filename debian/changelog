@@ -1,3 +1,10 @@
+apt-upchk (8) stable; urgency=low
+
+  * debconf template has been added
+  * all default configure file has been moved to example
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Tue,  1 Jun 2004 16:50:33 +0900
+
 apt-upchk (7) stable; urgency=low
 
   * small fix for woody XML::XQL bug...

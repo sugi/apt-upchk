@@ -1,1 +1,4 @@
 example/alias.include
+etc/notify.conf
+etc/report.conf
+etc/summary.conf

@@ -21,14 +21,14 @@ case "$1" in
     configure)
       id aptupchk > /dev/null 2>&1 || adduser --system --no-create-home --disabled-password aptupchk
       chown aptupchk -R /var/lib/apt-upchk/workroot
+      /usr/share/apt-uphck/scripts/update-settings || ture
 
     ;;
 
     abort-upgrade|abort-remove|abort-deconfigure)
 
     ;;
-
-    *)
+*)
         echo "postinst called with unknown argument \`$1'" >&2
         exit 1
     ;;

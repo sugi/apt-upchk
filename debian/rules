@@ -60,9 +60,10 @@ install: build
 	#$(MAKE) install DESTDIR=$(CURDIR)/debian/apt-upchk
 
 	mkdir -p $(TARGETDIR)/etc/apt-upchk
-	cp -a etc/* $(TARGETDIR)/etc/apt-upchk
+	#cp -a etc/* $(TARGETDIR)/etc/apt-upchk
 	mkdir -p $(TARGETDIR)/usr/share/apt-upchk/scripts
-	install src/* $(TARGETDIR)/usr/share/apt-upchk/scripts
+	install src/* debian/update-settings \
+	  $(TARGETDIR)/usr/share/apt-upchk/scripts
 	mkdir -p $(TARGETDIR)/usr/share/apt-upchk
 	cp -a lib $(TARGETDIR)/usr/share/apt-upchk
 	mkdir -p $(TARGETDIR)/var/lib/apt-upchk
@@ -85,7 +86,7 @@ binary-arch: build install
 	dh_installexamples
 #	dh_install
 #	dh_installmenu
-#	dh_installdebconf	
+	dh_installdebconf	
 #	dh_installlogrotate
 #	dh_installemacsen
 #	dh_installpam

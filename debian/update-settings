@@ -1,0 +1,18 @@
+#!/bin/sh
+
+notifyconf=/etc/notify.conf
+
+if ( test ! -r $notifyconf || grep -q "DO NOT MODIFY" $notifyconf); then
+    . /usr/share/debconf/confmodule
+
+    echo "# AUTOMATICALLY GENARATED. DO NOT MODIFY THIS." > $notifyconf
+    echo "# If you want to change, use 'dpkg-reconfigure apt-uphck'." >> $notifyconf
+
+    db_get apt-upchk/mailto
+    echo "mailto=\"$RET\"" >> $notifyconf
+
+else
+  echo "$notifyconf has been modified manually? exit..." >&2
+  exit 1
+fi
+
