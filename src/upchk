@@ -182,7 +182,7 @@ sub get_new_pkg_stat ($) {
     $line = <CHE> while $line !~ /^Versions:/;
     $line = <CHE>;
     close(CHE);
-    ($ret->{"new-version"}) = ($line =~ /^([\d.+:a-zA-Z-]+-[\d.+a-zA-Z]+)/);
+    ($ret->{"new-version"}) = ($line =~ /^([\d.+:a-zA-Z-]+)/);
     my @packages = ($line =~ /\(([^()]+)\)/g);
     foreach my $p (@packages) {
 	my $r = $p;
