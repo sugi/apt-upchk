@@ -153,7 +153,7 @@ sub __uppkg_banner {
     "== Update Packages ==\n"
 }
 sub __holdpkg_banner {
-    "== holds ageinst update ==\n"
+    "== holds against update ==\n"
 }
 
 sub __generic_fmt($) {
