@@ -9,7 +9,7 @@ upchkout="`${scriptdir}/upchk`"
 test "$?" == "0" && exit 0
 
 if [ "$mode" != "multi" ]; then
-  upchk=$(echo "$upchkout" | ${scriptdir}/report)
+  upchkout=$(echo "$upchkout" | ${scriptdir}/report)
   test "$?" == "0" && exit 0
 fi
 
