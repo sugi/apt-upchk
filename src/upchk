@@ -16,6 +16,7 @@ use Getopt::Long;
 Getopt::Long::Configure("gnu_getopt");
 use Sys::Hostname;
 use IO::File;
+use Data::Dumper;
 
 my $statfh = undef;
 my $exitcode = 0;
@@ -23,9 +24,10 @@ my $exitcode = 0;
 $ENV{LANG} = "C";
 $ENV{LC_ALL} = "C";
 
-our %opt = (config      => "/etc/apt-upchk/upchk.conf",
+our %opt = ( config     => "/etc/apt-upchk/upchk.conf",
 	    "no-update" => 0,
-	    "workroot"  => "/var/lib/apt-upchk/workroot",
+	     format     => "perl",
+	     workroot   => "/var/lib/apt-upchk/workroot",
 	    "apt-get"   => "/usr/share/apt-upchk/scripts/apt-simulate",
 	   );
 
@@ -37,7 +39,9 @@ if ( -r $opt{config} ) {
 my %cmdopt;
 GetOptions(\%cmdopt,
 	   "no-update|n",
-	   "apt-get=s" ) or die "\n";
+	   "apt-get=s",
+	   "format|f=s",
+	   ) or die "\n";
 
 foreach my $o (keys %cmdopt) {
     $opt{$o} = $cmdopt{$o};
@@ -58,16 +62,15 @@ unless ( $opt{"no-update"} ) {
 my @upgrade_out = split(/\n/, `$opt{"apt-get"} -u -s upgrade 2>&1`);
 my $upgrade_ret = $?;
 
-# output
+
+my $out = {};
+# stack all outout data
 {
-    print qq[<?xml version="1.0" encoding="US-ASCII"?>\n],
-	"<apt-upchk-report>\n",
-	"<version>$AptUpchk::VERSION</version>\n",
-        "<hostname>", hostname(), "</hostname>\n",
-	"<unixtime>", time(), "</unixtime>\n",
-	"<update-command><exitcode>${update_ret}</exitcode>\n",
-	"<output><![CDATA[", $update_out,
-	"]]></output></update-command>\n";
+    $out->{version}  = $AptUpchk::VERSION;
+    $out->{hostname} = hostname();
+    $out->{unixtime} = time();
+    $out->{"update-command"} = { exitcode => $update_ret,
+				 output => $update_out };
 
     {
 	my $kept_p = 0;
@@ -83,38 +86,48 @@ my $upgrade_ret = $?;
 	    elsif (/^The following packages have been kept back/){
 		$kept_p = 1;
 		$exitcode = 50;
+		$out->{keptbackpkg} = [];
 	    }
 	}
 	foreach (split /\s+/, $kept_lines) {
 	    $_ eq "" and next;
 	    my $pstat = &get_new_pkg_stat($_);
-	    print "<keptbackpkg>\n",
-		"<name>$_</name>\n",
-		"<current-version>", &get_installed_ver($_), "</current-version>\n",
-		"<new-version>", $pstat->{"new-version"}, "</new-version>\n",
-		"<release>", $pstat->{release}, "</release>\n",
-		"</keptbackpkg>\n";
+	    push @{$out->{keptbackpkg}},
+		{ name => $_,
+		 "current-version" => &get_installed_ver($_),
+		 "new-version" => $pstat->{"new-version"},
+		  release => $pstat->{release},
+		};
 	}
     }
 
     my @packages = grep(/^Inst /i, @upgrade_out);
-    $exitcode = 100 if @packages;
+    if (@packages) {
+	$exitcode = 100;
+	    $out->{updatepkg} = [];
+    }
     foreach (@packages) {
 	if ( /^Inst (\S+)\s+(?:\[(.*?)\])?\s*\((\S+)(?:\s+(.+?))?\)/ ) {
-	    print "<updatepkg>\n",
-		"<name>$1</name>\n",
-		"<current-version>",
-	       	$2 || &get_installed_ver($1),
-	       	"</current-version>\n",
-		"<new-version>$3</new-version>\n";
-	    print "<release>$4</release>\n" if ($4);
-	    print "</updatepkg>\n"
+	    push @{$out->{updatepkg}},
+		{ name => $1,
+		 "current-version" => $2 || &get_installed_ver($1),
+		 "new-version" => $3,
+		  release => $4,
+		};
 	} else {
 	    warn "abnormal line was detected: $_\n";
 	}
     }
+}
 
-    print "</apt-upchk-report>\n";
+if ( $opt{format} eq "perl") {
+    print Data::Dumper->Dump([$out], ["aptupchk"]);
+} elsif ($opt{format} eq "yaml") {
+    eval { use YAML (); };
+    if ($@) { die "can't load YAML library. please install libyaml-perl." }
+    print YAML::Dump($out);
+} else {
+    die "unknown format: '$opt{format}'\n";
 }
 
 exit($exitcode);

@@ -1,3 +1,10 @@
+apt-upchk (14) stable; urgency=low
+
+  * purge XML interface, dependency of libxml-* has been removed.
+  * report: add option; --format yaml
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Fri,  4 Feb 2005 20:12:47 +0900
+
 apt-upchk (13) stable; urgency=low
 
   * upchk: new version info for hold packages

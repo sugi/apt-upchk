@@ -7,6 +7,7 @@ Standards-Version: 3.6.1.0
 
 Package: apt-upchk
 Architecture: all
-Depends: cron, libxml-dom-perl, libxml-xql-perl, debconf
+Depends: cron, debconf
+Suggests: libyaml-perl
 Description: package update checker
  apt-upchk checks package updates and report it.

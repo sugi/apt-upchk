@@ -1,18 +1,18 @@
 #!/usr/bin/perl
 # -*- cperl -*-
 package main;
-use lib "/usr/share/apt-upchk/lib";
+#use lib "/usr/share/apt-upchk/lib";
 
 if (__FILE__ eq $0) {
     use strict;
     use warnings;
-    use XML::DOM;
     my $report_class = "AptUpchk::Report::SingleHost";
 
     if ($ARGV[0] && ($ARGV[0] eq "-m" || $ARGV[0] eq "--mail")) {
 	$report_class =  "AptUpchk::Report::Mail"
     }
     eval "use $report_class";
+    if ($@) { die "can't load report method '$report_class': $@\n" }
 
     our %opt = (config => @ARGV && $ARGV[0] || "/etc/apt-upchk/report.conf",
 		"exclude-byname" => [],
@@ -23,8 +23,11 @@ if (__FILE__ eq $0) {
     }
 
     my $exitcode = 0;
-    my $dom = XML::DOM::Parser->new->parse(*STDIN);
-    my $rep = $report_class->new(doc => $dom,
+    my $aptupchk;
+    my @data = <STDIN>;
+    eval "@data";
+    if ($@) { die "load report fail: $@\n" }
+    my $rep = $report_class->new(doc => $aptupchk,
 			        %opt
 			       );
 

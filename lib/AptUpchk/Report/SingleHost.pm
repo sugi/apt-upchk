@@ -2,9 +2,6 @@ package AptUpchk::Report::SingleHost;
 
 use strict;
 use warnings;
-use XML::DOM;
-use XML::XQL;
-use XML::XQL::DOM;
 use IO::File;
 use AptUpchk::Report::Common;
 
@@ -26,17 +23,18 @@ sub new {
 }
 
 sub _scan_updates {
+    # pickup non-excluded packages
     my $self = shift;
-    my (@security, @update);
+    my (@security, @update, @hold);
     my ($pkg);
 
   PKG:
-    foreach $pkg ( $self->{doc}->xql("/apt-upchk-report/updatepkg") ) {
+    foreach $pkg ( @{$self->{doc}->{updatepkg}} ) {
 	foreach my $i ( @{$self->{"exclude-byname"}} ) {
-	    [__get_first_data($pkg->xql("./name"))]->[0] =~ /^${i}$/i and next PKG;
+	    $pkg->{name} =~ /^${i}$/i and next PKG;
 	}
 
-	if ( [__get_first_data($pkg->xql("./release"))]->[0] =~ /-security:/i ) {
+	if ( $pkg->{release} =~ /-security:/i ) {
 	    next if $self->{"exclude-security"};
 	    push @security, $pkg;
 	} else {
@@ -44,28 +42,23 @@ sub _scan_updates {
 	    push @update, $pkg;
 	}
     }
+  HLD:
+    foreach $pkg ( @{$self->{doc}->{keptbackpkg}} ) {
+	foreach my $i ( @{$self->{"exclude-byname"}} ) {
+	    $pkg->{name} =~ /^${i}$/i and next HLD;
+	}
+	push @hold, $pkg;
+    }
     $self->{pkgcache} = {} unless exists $self->{pkgcache};
     $self->{pkgcache}->{security} = [@security];
     $self->{pkgcache}->{update}   = [@update];
+    $self->{pkgcache}->{hold}     = [@hold];
     $self;
 }
 
 sub _get_hold_pkg {
     my $self = shift;
-    my @pkg;
-    return @pkg if $self->{"exclude-hold"};
-
-    unless (exists $self->{pkgcache}->{hold}) {
-      PKG:
-	foreach my $pkg ( $self->{doc}->xql("/apt-upchk-report/keptbackpkg") ){
-	    foreach my $i ( @{$self->{"exclude-byname"}} ) {
-		[__get_first_data($pkg->xql("./name"))]->[0] =~ /^${i}$/i and next PKG;
-
-	     }
-	     push @pkg, $pkg;
-	}
-	$self->{pkgcache}->{hold} = [@pkg];
-    }
+    $self->_scan_updates unless exists $self->{pkgcache}->{hold};
     @{$self->{pkgcache}->{hold}};
 }
 
@@ -83,12 +76,12 @@ sub _get_security_pkg {
 
 sub _get_update_exitcode {
     my $self = shift;
-    __get_first_data($self->{doc}->xql("/apt-upchk-report/update-command/exitcode"));
+    $self->{doc}->{"update-command"}->{exitcode};
 }
 
 sub _get_update_output {
     my $self = shift;
-    __get_first_data($self->{doc}->xql("/apt-upchk-report/update-command/output"));
+    $self->{doc}->{"update-command"}->{output};
 }
 
 sub report {
@@ -167,10 +160,8 @@ sub __generic_fmt($) {
     my $self = shift;
     my $p = shift;
     sprintf("%-20s %12s => %12s (%s)\n",
-	    __get_first_data($p->xql("./name"),
-			     $p->xql("./current-version"),
-			     $p->xql("./new-version"),
-			     $p->xql("./release")));
+	    $p->{name}, $p->{"current-version"},
+	    $p->{"new-version"}, $p->{release});
 }
 
 sub __secpkg_fmt($) {
@@ -184,6 +175,5 @@ sub __uppkg_fmt($) {
 sub __holdpkg_fmt($) {
     shift->__generic_fmt(@_);
 }
-
 
 1;
