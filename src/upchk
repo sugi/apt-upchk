@@ -167,7 +167,9 @@ sub get_new_pkg_stat ($) {
 		$rel{$1} = $2;
 	    }
 	    $rfh->close;
-	    $ret->{release} = "$rel{Label}:$rel{Version}/$rel{Archive}";
+	    $ret->{release} = defined($rel{Version}) ?
+		"$rel{Label}:$rel{Version}/$rel{Archive}" :
+		    "$rel{Label}:$rel{Archive}";
 	    last;
 	}
 	$ret->{release} = ($p =~ m|.+/([^_]+)|);
