@@ -11,8 +11,6 @@ use XML::XQL::DOM;
 use AptUpchk::Notify::Common;
 use AptUpchk::Report::MultiHost;
 
-$Conf{timeout} = 10;
-
 sub new {
     my $class = shift;
     my $self  = { debug => 0, need_send => 0, temp => undef, @_ };
