@@ -126,24 +126,24 @@ if ( !$opt{"no-cache"} && -f $opt{cache} &&
 	}
     }
 
-    my $ch = IO::File->new($opt{cache}, "w");
-    print $ch Data::Dumper->Dump([$out], ["out"]);
-    $ch->close;
+    open(CH, "> $opt{cache}");
+    print CH Data::Dumper->Dump([$out], ["out"]);
+    close CH;
 }
 
-if ( $opt{format} eq "perl") {
+if ($opt{format} eq "perl") {
     print Data::Dumper->Dump([$out], ["aptupchk"]);
 } elsif ($opt{format} eq "yaml") {
-    eval { use YAML (); };
-    if ($@) { die "can't load YAML library. please install libyaml-perl." }
+    eval "use YAML ();";
+    if ($@) { die "can't load YAML library. please install libyaml-perl." };
     print YAML::Dump($out);
 } else {
     die "unknown format: '$opt{format}'\n";
 }
 
-if (@{$out->{updatepkg}}) {
+if (defined($out->{updatepkg}) && @{$out->{updatepkg}}) {
     $exitcode = 100;
-} elsif (@{$out->{keptbackpkg}}) {
+} elsif (defined($out->{keptbackpkg}) && @{$out->{keptbackpkg}}) {
     $exitcode = 50;
 }
 exit($exitcode);
