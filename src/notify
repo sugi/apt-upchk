@@ -3,12 +3,12 @@
 scriptdir=/usr/share/apt-upchk/scripts
 test -r /etc/apt-upchk/notify.conf && . /etc/apt-upchk/notify.conf
 : ${mailto:=root}
-: ${mode=master}
+: ${mode=single}
 
 upchkout="`${scriptdir}/upchk`"
 test "$?" == "0" && exit 0
 
-if [ "$mode" == "single" ]; then
+if [ "$mode" != "multi" ]; then
   upchk=$(echo "$upchkout" | ${scriptdir}/report)
   test "$?" == "0" && exit 0
 fi
