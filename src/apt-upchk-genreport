@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# -*- cperl -*-
 package AptUpchk::Report::SingleHost;
 
 use strict;
@@ -51,14 +52,38 @@ sub _get_security_pkg {
     @{$self->{pkg}->{security}};
 }
 
-sub report {
+sub _get_update_exitcode {
     my $self = shift;
-    $self->report_security and print "\n";
-    $self->report_update   and print "\n";
-    $self->report_hold     and print "\n";
+    [__get_first_data($self->{doc}->xql("/apt-upchk-report/update-command/exitcode"))]->[0];
 }
 
-sub report_security {
+sub _get_update_output {
+    my $self = shift;
+    [__get_first_data($self->{doc}->xql("/apt-upchk-report/update-command/output"))]->[0];
+}
+
+
+sub report {
+    my $self = shift;
+    $self->report_update_err   and print "\n";
+    $self->report_security_pkg and print "\n";
+    $self->report_update_pkg   and print "\n";
+    $self->report_hold_pkg     and print "\n";
+}
+
+sub report_update_err {
+    my $self = shift;
+    my $err;
+    if ( ($err = $self->_get_update_exitcode) != 0 ) {
+	print "Warning: apt-get update exited with error($err);\n";
+	print $self->_get_update_output;
+	1;
+    } else {
+	0;
+    }
+}
+
+sub report_security_pkg {
     my $self = shift;
     my @pkgs = $self->_get_security_pkg or return 0;
     print "== SECURITY UPDATES ==\n";
@@ -68,7 +93,7 @@ sub report_security {
     return 1;
 }
 
-sub report_update {
+sub report_update_pkg {
     my $self = shift;
     my @pkgs = $self->_get_update_pkg or return 0;
     print "== Update Packages ==\n";
@@ -78,7 +103,7 @@ sub report_update {
     return 1;
 }
 
-sub report_hold {
+sub report_hold_pkg {
     my $self = shift;
     my @pkgs = $self->_get_hold_pkg or return 0;
     print "== holds ageinst update ==\n";
