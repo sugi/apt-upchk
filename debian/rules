@@ -62,7 +62,7 @@ install: build
 	mkdir -p $(TARGETDIR)/etc/apt-upchk
 	#cp -a etc/* $(TARGETDIR)/etc/apt-upchk
 	mkdir -p $(TARGETDIR)/usr/share/apt-upchk/scripts
-	install src/* debian/update-settings \
+	install src/* \
 	  $(TARGETDIR)/usr/share/apt-upchk/scripts
 	mkdir -p $(TARGETDIR)/usr/share/apt-upchk
 	cp -a lib $(TARGETDIR)/usr/share/apt-upchk
