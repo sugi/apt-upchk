@@ -50,7 +50,7 @@ my $upgrade_ret = $?;
 	"<apt-upchk-report>\n",
 	"<version>$VERSION</version>\n",
         "<hostname>", hostname(), "</hostname>\n",
-	"<unixtime>", localtime(), "</unixtime>\n",
+	"<unixtime>", time(), "</unixtime>\n",
 	"<update-command><exitcode>${update_ret}</exitcode>\n",
 	"<output><![CDATA[", $update_out,
 	"]]></output></update-command>\n";

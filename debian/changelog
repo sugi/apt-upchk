@@ -1,3 +1,11 @@
+apt-upchk (6) stable; urgency=low
+
+  * summary-sender: separate summary-sender between daemon and client
+  * upchk: small fix for woody; kept back detection
+  * report: multi host mode
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Sat, 29 May 2004 05:06:04 +0900
+
 apt-upchk (5) stable; urgency=low
 
   * remove config: apt-upchk.conf
