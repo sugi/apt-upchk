@@ -10,12 +10,13 @@
 
 use strict;
 use warnings;
+use lib '/usr/share/apt-upchk/lib';
+use AptUpchk;
 use Getopt::Long;
 Getopt::Long::Configure("gnu_getopt");
 use Sys::Hostname;
 use IO::File;
 
-our $VERSION = "2";
 my $statfh = undef;
 my $exitcode = 0;
 
@@ -60,7 +61,7 @@ my $upgrade_ret = $?;
 {
     print qq[<?xml version="1.0" encoding="US-ASCII"?>\n],
 	"<apt-upchk-report>\n",
-	"<version>$VERSION</version>\n",
+	"<version>$AptUpchk::VERSION</version>\n",
         "<hostname>", hostname(), "</hostname>\n",
 	"<unixtime>", time(), "</unixtime>\n",
 	"<update-command><exitcode>${update_ret}</exitcode>\n",
