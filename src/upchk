@@ -10,7 +10,7 @@
 
 use strict;
 use warnings;
-#use lib '/usr/share/apt-upchk/lib';
+use lib '/usr/share/apt-upchk/lib';
 use AptUpchk;
 use Getopt::Long;
 Getopt::Long::Configure("gnu_getopt");
