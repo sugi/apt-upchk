@@ -27,7 +27,7 @@ use XML::DOM;
 use XML::XQL;
 use XML::XQL::DOM;
 use lib "/usr/share/apt-upchk/scripts";
-require 'genreport';
+require 'report';
 
 sub new {
     my $class = shift;
