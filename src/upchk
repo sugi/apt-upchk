@@ -25,6 +25,7 @@ $ENV{LC_ALL} = "C";
 
 our %opt = (config      => "/etc/apt-upchk/upchk.conf",
 	    "no-update" => 0,
+	    "workroot"  => "/var/lib/apt-upchk/workroot",
 	    "apt-get"   => "/usr/share/apt-upchk/scripts/apt-simulate",
 	   );
 
@@ -86,9 +87,12 @@ my $upgrade_ret = $?;
 	}
 	foreach (split /\s+/, $kept_lines) {
 	    $_ eq "" and next;
+	    my $pstat = &get_new_pkg_stat($_);
 	    print "<keptbackpkg>\n",
 		"<name>$_</name>\n",
 		"<current-version>", &get_installed_ver($_), "</current-version>\n",
+		"<new-version>", $pstat->{"new-version"}, "</new-version>\n",
+		"<release>", $pstat->{release}, "</release>\n",
 		"</keptbackpkg>\n";
 	}
     }
@@ -141,3 +145,32 @@ sub get_installed_ver($) {
     $version;
 }
 
+sub get_new_pkg_stat ($) {
+    my $pkg = shift;
+    my $ret = {};
+    my $line = "";
+    open(CHE, "apt-cache -o Dir='$opt{workroot}' showpkg $pkg|");
+    $line = <CHE> while $line !~ /^Versions:/;
+    $line = <CHE>;
+    close(CHE);
+    $ret->{"new-version"} = $line =~ /^(\d[^\d.-]*-\d+)/;
+    my @packages = ($line =~ /\(([^()]+)\)/g);
+    foreach my $p (@packages) {
+	my $r = $p;
+	$r =~ s/_Packages$/_Release/;
+	if ( -f $r ) {
+	    my %rel = (Label => "", Version => "", Archive => "");
+	    my $rfh = IO::File->new($r);
+	    my $rl;
+	    while ($rl = <$rfh>) {
+		$rl =~ /^([^:]+):\s+(.*)/;
+		$rel{$1} = $2;
+	    }
+	    $rfh->close;
+	    $ret->{release} = "$rel{Label}:$rel{Version}/$rel{Archive}";
+	    last;
+	}
+	$ret->{release} = ($p =~ m|.+/([^_]+)|);
+    }
+    $ret;
+}
