@@ -174,15 +174,15 @@ sub __generic_fmt($) {
 }
 
 sub __secpkg_fmt($) {
-    __generic_fmt(@_);
+    shift->__generic_fmt(@_);
 }
 
 sub __uppkg_fmt($) {
-    __generic_fmt(@_);
+    shift->__generic_fmt(@_);
 }
 
 sub __holdpkg_fmt($) {
-    __generic_fmt(@_);
+    shift->__generic_fmt(@_);
 }
 
 
