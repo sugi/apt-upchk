@@ -1,3 +1,9 @@
+apt-upchk (9) stable; urgency=low
+
+  * typo in report script
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Tue,  1 Jun 2004 18:08:49 +0900
+
 apt-upchk (8) stable; urgency=low
 
   * debconf template has been added
