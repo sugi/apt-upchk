@@ -10,8 +10,8 @@
 
 use strict;
 use warnings;
-#use Getopt::Long;
-#Getopt::Long::Configure("gnu_getopt");
+use Getopt::Long;
+Getopt::Long::Configure("gnu_getopt");
 use Sys::Hostname;
 use IO::File;
 
@@ -22,8 +22,9 @@ my $exitcode = 0;
 $ENV{LANG} = "C";
 $ENV{LC_ALL} = "C";
 
-our %opt = (config   => "/etc/apt-upchk/upchk.conf",
-	    noupdate => 0
+our %opt = (config      => "/etc/apt-upchk/upchk.conf",
+	    "no-update" => 0,
+	    "apt-get"   => "/usr/share/apt-upchk/scripts/apt-simulate",
 	   );
 
 if ( -r $opt{config} ) {
@@ -31,17 +32,28 @@ if ( -r $opt{config} ) {
     die "Error in config file: $@\n" if $@;
 }
 
-our $apt_get = "/usr/share/apt-upchk/scripts/apt-simulate";
+my %cmdopt;
+GetOptions(\%cmdopt,
+	   "no-update|n",
+	   "apt-get=s" ) or die "\n";
+
+foreach my $o (keys %cmdopt) {
+    $opt{$o} = $cmdopt{$o};
+}
+
+unless ( -x $opt{"apt-get"} ) {
+    die "Can't exec apt-get($opt{'apt-get'}): $!\n";
+}
 
 my $update_out = "";
 my $update_ret = 0;
 
-unless ( $opt{noupdate} ) {
-    $update_out = `$apt_get -qq update 2>&1`;
+unless ( $opt{"no-update"} ) {
+    $update_out = `$opt{"apt-get"} -qq update 2>&1`;
     $update_ret = $? >> 8;
 }
 
-my @upgrade_out = split(/\n/, `$apt_get -u -s upgrade 2>&1`);
+my @upgrade_out = split(/\n/, `$opt{"apt-get"} -u -s upgrade 2>&1`);
 my $upgrade_ret = $?;
 
 # output
