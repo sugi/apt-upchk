@@ -1,3 +1,9 @@
+apt-upchk (10) stable; urgency=low
+
+  * ad-hoc support; ignore by name
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Thu,  8 Jul 2004 15:03:09 +0900
+
 apt-upchk (9) stable; urgency=low
 
   * typo in report script

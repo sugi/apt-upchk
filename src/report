@@ -8,36 +8,23 @@ if (__FILE__ eq $0) {
     use strict;
     use warnings;
     use XML::DOM;
-    my $dom = XML::DOM::Parser->new->parse(*STDIN);
-    my $rep = AptUpchk::Report::SingleHost->new($dom);
-    my $exitcode = 0;
 
     our %opt = (config => @ARGV && $ARGV[0] || "/etc/apt-upchk/report.conf",
-	       "report-update-pkg" => 1, "report-hold-pkg" => 1,
-	       "report-security-pkg" => 1, "report-update-error" => 1,
-	       "ignore-pkg" => []);
+		"ignore-name" => [],
+		"ignore-type" => []);
     if ( -r $opt{config} ) {
 	do $opt{config};
 	die "Error in config file: $@\n" if $@;
     }
 
-    $opt{"report-update-error"}
-	and $rep->report_update_err
-	    and $exitcode = 100
-		and print "\n";
+    my $exitcode = 0;
+    my $dom = XML::DOM::Parser->new->parse(*STDIN);
+    my $rep = AptUpchk::Report::SingleHost->new(doc => $dom,
+						"ignore-type"=>$opt{"ignore-type"},
+					        "ignore-name"=>$opt{"ignore-name"},
+					       );
 
-    $opt{"report-update-pkg"}
-	and $rep->report_security_pkg
-	    and $exitcode = 100
-		and print "\n";
-    $opt{"report-update-pkg"}
-	and $rep->report_update_pkg
-	    and $exitcode = 100
-		and	print "\n";
-    $opt{"report-hold-pkg"}
-	and $rep->report_hold_pkg
-	    and $exitcode = 100
-		and print "\n";
+    $rep->report and $exitcode = 100;
 
     exit($exitcode);
 }

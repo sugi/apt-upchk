@@ -11,11 +11,10 @@ use AptUpchk::Report::Common;
 sub new {
     my $class = shift;
     my $self;
-    if (@_ == 1) {
-	$self = { doc => shift };
-    } else {
-	$self = { @_ };
-    }
+    my @opt = @_;
+    @opt = (doc => shift) if (@_ == 1);
+    $self = {"ignore-type" => [], "ignore-name" =>[],
+	     @opt};
     unless (exists $self->{output}) {
 	$self->{output} = IO::File->new(">-");
     }
@@ -26,37 +25,60 @@ sub _scan_updates {
     my $self = shift;
     my (@security, @update);
     my ($pkg);
+    my %ignore_t;
+    @ignore_t{@{$self->{"ignore-type"}}}=();
+
+  PKG:
     foreach $pkg ( $self->{doc}->xql("/apt-upchk-report/updatepkg") ) {
+	foreach my $i ( @{$self->{"ignore-name"}} ) {
+	    [__get_first_data($pkg->xql("./name"))]->[0] =~ /^${i}$/i and next PKG;
+	}
+
 	if ( [__get_first_data($pkg->xql("./release"))]->[0] =~ /-security:/i ) {
+	    next if exists $ignore_t{"security"};
 	    push @security, $pkg;
 	} else {
+	    next if exists $ignore_t{"normal"};
 	    push @update, $pkg;
 	}
     }
-    $self->{pkg} = {} unless exists $self->{pkg};
-    $self->{pkg}->{security} = [@security];
-    $self->{pkg}->{update} = [@update];
+    $self->{pkgcache} = {} unless exists $self->{pkgcache};
+    $self->{pkgcache}->{security} = [@security];
+    $self->{pkgcache}->{update}   = [@update];
     $self;
 }
 
 sub _get_hold_pkg {
     my $self = shift;
-    unless (exists $self->{pkg}->{hold}) {
-	$self->{pkg}->{hold} = [$self->{doc}->xql("/apt-upchk-report/keptbackpkg")];
+    my @pkg;
+    my %ignore_t;
+    @ignore_t{@{$self->{"ignore-type"}}}=();
+    return @pkg if exists $ignore_t{"hold"};
+
+    unless (exists $self->{pkgcache}->{hold}) {
+      PKG:
+	foreach my $pkg ( $self->{doc}->xql("/apt-upchk-report/keptbackpkg") ){
+	    foreach my $i ( @{$self->{"ignore-name"}} ) {
+		[__get_first_data($pkg->xql("./name"))]->[0] =~ /^${i}$/i and next PKG;
+
+	     }
+	     push @pkg, $pkg;
+	}
+	$self->{pkgcache}->{hold} = [@pkg];
     }
-    @{$self->{pkg}->{hold}};
+    @{$self->{pkgcache}->{hold}};
 }
 
 sub _get_update_pkg {
     my $self = shift;
-    $self->_scan_updates unless exists $self->{pkg}->{update};
-    @{$self->{pkg}->{update}};
+    $self->_scan_updates unless exists $self->{pkgcache}->{update};
+    @{$self->{pkgcache}->{update}};
 }
 
 sub _get_security_pkg {
     my $self = shift;
-    $self->_scan_updates unless exists $self->{pkg}->{security};
-    @{$self->{pkg}->{security}};
+    $self->_scan_updates unless exists $self->{pkgcache}->{security};
+    @{$self->{pkgcache}->{security}};
 }
 
 sub _get_update_exitcode {
@@ -71,14 +93,20 @@ sub _get_update_output {
 
 sub report {
     my $self = shift;
-    $self->report_update_err   and $self->_msg("\n");
-    $self->report_security_pkg and $self->_msg("\n");
-    $self->report_update_pkg   and $self->_msg("\n");
-    $self->report_hold_pkg     and $self->_msg("\n");
+    my $ret  = 0;
+    $self->report_update_err   and $ret = 1 and $self->_msg("\n");
+    $self->report_security_pkg and $ret = 1 and $self->_msg("\n");
+    $self->report_update_pkg   and $ret = 1 and $self->_msg("\n");
+    $self->report_hold_pkg     and $ret = 1 and $self->_msg("\n");
+    $ret;
 }
 
 sub report_update_err {
     my $self = shift;
+    my %ignore_t;
+    @ignore_t{@{$self->{"ignore-type"}}}=();
+    return 0 if exists $ignore_t{"update-error"};
+
     my $err;
     if ( ($err = $self->_get_update_exitcode) != 0 ) {
 	$self->_msg("Warning: apt-get update exited with error($err);\n");
@@ -140,19 +168,21 @@ sub __holdpkg_banner {
 sub __secpkg_fmt($) {
     my $self = shift;
     my $p = shift;
-    sprintf("%-22s %15s => %15s\n",
+    sprintf("%-20s %12s => %12s (%s)\n",
 	    __get_first_data($p->xql("./name"),
 			     $p->xql("./current-version"),
-			     $p->xql("./new-version")));
+			     $p->xql("./new-version"),
+			     $p->xql("./release")));
 }
 
 sub __uppkg_fmt($) {
     my $self = shift;
     my $p = shift;
-    sprintf("%-22s %15s => %15s\n",
+    sprintf("%-20s %12s => %12s (%s)\n",
 	    __get_first_data($p->xql("./name"),
 			     $p->xql("./current-version"),
-			     $p->xql("./new-version")));
+			     $p->xql("./new-version"),
+			     $p->xql("./release")));
 
 }
 
