@@ -10,8 +10,8 @@
 
 use strict;
 use warnings;
-use Getopt::Long;
-Getopt::Long::Configure("gnu_getopt");
+#use Getopt::Long;
+#Getopt::Long::Configure("gnu_getopt");
 use Sys::Hostname;
 use IO::File;
 
@@ -51,7 +51,7 @@ my $upgrade_ret = $?;
         "<hostname>", hostname(), "</hostname>\n",
 	"<unixtime>", localtime(), "</unixtime>\n",
 	"<update-command><exitcode>${update_ret}</exitcode>\n",
-	"<output><![CDATA[\n", $update_out,
+	"<output><![CDATA[", $update_out,
 	"]]></output></update-command>\n";
 
     my @packages = grep(/^Inst /i, @upgrade_out);
@@ -59,7 +59,9 @@ my $upgrade_ret = $?;
 	if ( /^Inst (\S+)\s+(?:\[(.*?)\])?\s*\((\S+)(?:\s+(.+?))?\)/ ) {
 	    print "<updatepkg>\n",
 		"<name>$1</name>\n",
-		"<current-version>", $2 || &get_installed_ver($1), "</current-version>\n",
+		"<current-version>",
+	       	$2 || &get_installed_ver($1),
+	       	"</current-version>\n",
 		"<new-version>$3</new-version>\n";
 	    print "<release>$4</release>\n" if ($4);
 	    print "</updatepkg>\n"
