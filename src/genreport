@@ -166,8 +166,37 @@ if (__FILE__ eq $0) {
     use XML::DOM;
     my $dom = XML::DOM::Parser->new->parse(*STDIN);
     my $rep = AptUpchk::Report::SingleHost->new($dom);
+    my $exitcode = 0;
+
+    my %opt = (config => @ARGV && $ARGV[0] || "/etc/apt-upchk/report.conf",
+	       "repot-update-pkg" => 1, "report-hold-pkg" => 1,
+	       "report-security-pkg" => 1, "repot-update-error" => 1);
+    if ( -r $opt{config} ) {
+	do $opt{config};
+	die "Error in config file: $@\n" if $@;
+    }
+
     #$rep->{output} = IO::File->new(">out");
-    $rep->report;
+
+    $opt{"repot-update-error"}
+	and $rep->report_update_err
+	    and $exitcode = 100
+		and print "\n";
+
+    $opt{"repot-update-pkg"}
+	and $rep->report_security_pkg
+	    and $exitcode = 100
+		and print "\n";
+    $opt{"repot-update-pkg"}
+	and $rep->report_update_pkg
+	    and $exitcode = 100
+		and	print "\n";
+    $opt{"repot-update-pkg"}
+	and $rep->report_hold_pkg
+	    and $exitcode = 100
+		and print "\n";
+
+    exit($exitcode);
 }
 
 1;
