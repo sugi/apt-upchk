@@ -2,10 +2,16 @@
 
 test -r /etc/apt-upchk/notify.conf && . /etc/apt-upchk/notify.conf
 : ${mailto:=root}
+: ${mode=master}
 
-upchk="`/usr/sbin/apt-upchk`"
+upchk="`/usr/share/apt-upchk/scripts/apt-upchk`"
 
-test -z "$upchk" && exit 0
+if [ "$mode" == "master" ]; then
+  upchk=$(echo "$upchk" | /usr/share/apt-upchk/scripts/apt-upchk-genreport)
+  test -z "$upchk" && exit 0
+else
+  (echo "upchk" | egrep -q "(<updatepkg>|<keptbackpkg>)") || exit 0
+fi
 
 echo "Subject: [`hostname -s`] Updated Package Available
 X-Sender: apt-upchk-notify (`hostname -s`)
