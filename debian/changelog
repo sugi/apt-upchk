@@ -1,3 +1,9 @@
+apt-upchk (15) stable; urgency=low
+
+  * upchk: fix for perl5.6
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Mon,  7 Feb 2005 18:43:07 +0900
+
 apt-upchk (14) stable; urgency=low
 
   * purge XML interface, dependency of libxml-* has been removed.
