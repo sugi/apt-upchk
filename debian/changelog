@@ -1,3 +1,9 @@
+apt-upchk (13) stable; urgency=low
+
+  * upchk: new version info for hold packages
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Tue,  4 Jan 2005 16:06:40 +0900
+
 apt-upchk (12) stable; urgency=low
 
   * report: bug fix; normal update was allways ignored
