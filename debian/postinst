@@ -22,10 +22,10 @@ case "$1" in
       id aptupchk > /dev/null 2>&1 || adduser --system --no-create-home --disabled-password aptupchk
       chown aptupchk -R /var/lib/apt-upchk/workroot
 
-      notifyconf=/etc/notify.conf
+      notifyconf=/etc/apt-upchk/notify.conf
 
+      . /usr/share/debconf/confmodule
       if ( test ! -r $notifyconf || grep -q "DO NOT MODIFY" $notifyconf); then
-        . /usr/share/debconf/confmodule
 
         echo "# AUTOMATICALLY GENARATED. DO NOT MODIFY THIS." > $notifyconf
         echo "# If you want to change, use 'dpkg-reconfigure apt-uphck'." >> $notifyconf
