@@ -163,7 +163,7 @@ sub __holdpkg_banner {
     "== holds ageinst update ==\n"
 }
 
-sub __secpkg_fmt($) {
+sub __generic_fmt($) {
     my $self = shift;
     my $p = shift;
     sprintf("%-20s %12s => %12s (%s)\n",
@@ -171,25 +171,18 @@ sub __secpkg_fmt($) {
 			     $p->xql("./current-version"),
 			     $p->xql("./new-version"),
 			     $p->xql("./release")));
+}
+
+sub __secpkg_fmt($) {
+    __generic_fmt(@_);
 }
 
 sub __uppkg_fmt($) {
-    my $self = shift;
-    my $p = shift;
-    sprintf("%-20s %12s => %12s (%s)\n",
-	    __get_first_data($p->xql("./name"),
-			     $p->xql("./current-version"),
-			     $p->xql("./new-version"),
-			     $p->xql("./release")));
-
+    __generic_fmt(@_);
 }
 
 sub __holdpkg_fmt($) {
-    my $self = shift;
-    my $p = shift;
-    sprintf("%s (%s)\n",
-	    __get_first_data($p->xql("./name"),
-			     $p->xql("./current-version")));
+    __generic_fmt(@_);
 }
 
 
