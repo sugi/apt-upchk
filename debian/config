@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -e
+
+action=$1
+version=$2
+
+# debconf module
+. /usr/share/debconf/confmodule
+db_version 2.0
+
+db_input high apt-uphck/mailto || true
+db_go
