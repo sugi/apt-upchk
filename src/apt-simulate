@@ -1,0 +1,8 @@
+#!/bin/sh
+
+workroot=/var/lib/apt-upchk/workroot
+
+exec apt-get \
+  -o Dir=${workroot} \
+  -o Dir::State::status=${workroot}/var/lib/dpkg/status \
+  "$@"

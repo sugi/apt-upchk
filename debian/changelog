@@ -1,0 +1,20 @@
+apt-upchk (3) stable; urgency=low
+
+  * apt-upchk: plain text mode has been removed
+  * apt-upchk-genreport: added. a formater for XML of apt-upchk
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Thu, 27 May 2004 02:38:32 +0900
+
+apt-upchk (2) stable; urgency=low
+
+  * apt-upchk: rewrite with perl
+  * apt-upchk: XML mode has been added.
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Fri, 14 May 2004 17:03:49 +0900
+
+apt-upchk (1) stable; urgency=low
+
+  * Alpha Release.
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Mon, 10 May 2004 18:40:02 +0900
+

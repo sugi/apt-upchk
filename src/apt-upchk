@@ -1,0 +1,194 @@
+#!/usr/bin/perl
+
+#
+# simple apt update checker.
+#
+# author: Tatsuki Sugiura <sugi@nemui.org>
+# license: GPL
+#
+
+use strict;
+use warnings;
+use Getopt::Long;
+Getopt::Long::Configure("gnu_getopt");
+use Sys::Hostname;
+use IO::File;
+
+our $VERSION = "2";
+my $statfh = undef;
+
+$ENV{LANG} = "C";
+$ENV{LC_ALL} = "C";
+
+our %opt = (config   => "/etc/apt-upchk/apt-upchk.conf",
+	    output   => "plain",
+	    noupdate => 0,
+	    "report-hold"     => 1,
+	    "report-security" => 1,
+	    "report-normal"   => 1,
+	   );
+
+if ( -r $opt{config} ) {
+    do $opt{config};
+    die "Error in config file: $@\n" if $@;
+}
+
+unless ( $opt{output} eq "plain" || $opt{output} eq "XML" ) {
+    die "unknown output mode: $opt{output}\n";
+}
+
+our $apt_get = "/usr/share/apt-upchk/scripts/apt-simulate";
+
+my $update_out = "";
+my $update_ret = 0;
+
+unless ( $opt{noupdate} ) {
+    $update_out = `$apt_get -qq update 2>&1`;
+    $update_ret = $? >> 8;
+}
+
+
+my @upgrade_out = split(/\n/, `$apt_get -u -s upgrade 2>&1`);
+my $upgrade_ret = $?;
+
+
+# plain text mode
+if ($opt{output} eq "plain"){
+    ## sub routine
+    my $pkglinefmt = sub {
+	map {
+	    if ( /^Inst (\S+)\s+(?:\[(.*?)\])?\s*\((\S+)(?:\s+(.+?))?\)/ ) {
+		sprintf("%-20s %12s => %12s (%s)\n",
+			$1, $2 || &get_installed_ver($1), $3, $4);
+	    } else {
+		$_;
+	    }
+	} @_;
+    };
+
+    ##
+
+    # repot if update error
+    if ($update_ret != 0) {
+	print "Warning: update exited with error. (exit code=$update_ret);\n";
+	print $update_out, "\n";
+    }
+
+    my @packages = grep(/^Inst /i, @upgrade_out);
+    # report security update
+    if ($opt{"report-security"}) {
+	my @sec;
+	if (@sec = grep(/security:/i, @packages)) {
+	    print "== SECURITY UPDATE ==\n";
+	    print &$pkglinefmt(@sec);
+	    print "\n";
+	}
+    }
+
+    # report normal update
+    if ($opt{"report-normal"}) {
+	my @pkg;
+	if (@pkg = grep(!/security:/i, @packages)) {
+	    print "== Update Package ==\n";
+	    print &$pkglinefmt(@pkg);
+	    print "\n";
+	}
+    }
+
+    # report kept back
+    if ($opt{"report-hold"}){
+	my $kept_p = 0;
+	foreach ( @upgrade_out ) {
+	    if ($kept_p) {
+		if (/^ /) {
+		    print "$_\n";
+		} else {
+		    $kept_p = 0;
+		}
+	    }
+	    elsif (/^The following packages have been kept back/){
+		$kept_p = 1;
+		print "== kept back ==\n";
+	    }
+	}
+    }
+}
+
+# XML mode
+if ($opt{output} eq "XML"){
+    print qq[<?xml version="1.0" encoding="US-ASCII"?>\n],
+	"<apt-upchk-report>\n",
+	"<version>$VERSION</version>\n",
+        "<hostname>", hostname(), "</hostname>\n",
+	"<unixtime>", localtime(), "</unixtime>\n",
+	"<update-command><exitcode>${update_ret}</exitcode>\n",
+	"<output><![CDATA[\n", $update_out,
+	"]]></output></update-command>\n";
+
+    my @packages = grep(/^Inst /i, @upgrade_out);
+    foreach (@packages) {
+	if ( /^Inst (\S+)\s+(?:\[(.*?)\])?\s*\((\S+)(?:\s+(.+?))?\)/ ) {
+	    print "<updatepkg>\n",
+		"<name>$1</name>\n",
+		"<current-version>", $2 || &get_installed_ver($1), "</current-version>\n",
+		"<new-version>$3</new-version>\n";
+	    print "<release>$4</release>\n" if ($4);
+	    print "</updatepkg>\n"
+	} else {
+	    warn "abnormal line was detected: $_\n";
+	}
+    }
+
+    {
+	my $kept_p = 0;
+	my $kept_lines = "";
+	foreach ( @upgrade_out ) {
+	    if ($kept_p) {
+		if (/^ /) {
+		    $kept_lines .= " $_ ";
+		} else {
+		    $kept_p = 0;
+		}
+	    }
+	    elsif (/have been kept back:/){
+		$kept_p = 1;
+	    }
+	}
+	foreach (split /\s+/, $kept_lines) {
+	    $_ eq "" and next;
+	    print "<keptbackpkg>\n",
+		"<name>$_</name>\n",
+		"<current-version>", &get_installed_ver($_), "</current-version>\n",
+		"</keptbackpkg>\n";
+	}
+    }
+
+    print "</apt-upchk-report>\n";
+}
+
+
+## utils
+sub get_installed_ver($) {
+    my $pkg = shift;
+    my $version = undef;
+    unless ( $statfh ) {
+	$statfh = IO::File->new("/var/lib/dpkg/status");
+    }
+
+    my ($line);
+    seek($statfh, 0, 0);
+  LOOP:
+    while ( $line = <$statfh> ) {
+	if ($line =~ /^Package:\s+${pkg}$/) {
+	    while ( $line = <$statfh> ) {
+		if ($line =~ /^Version:\s+(.*)$/) {
+		    $version = $1;
+		    last LOOP;
+		} elsif ( $line eq "\n" ) {
+		    last LOOP;
+		}
+	    }
+	}
+    }
+    $version;
+}

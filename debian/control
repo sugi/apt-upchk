@@ -1,0 +1,12 @@
+Source: apt-upchk
+Section: admin
+Priority: optional
+Maintainer: Tatsuki Sugiura <sugi@nemui.org>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.1.0
+
+Package: apt-upchk
+Architecture: all
+Depends: cron
+Description: package update checker
+ apt-upchk checks package updates and report it.

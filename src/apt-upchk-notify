@@ -1,0 +1,16 @@
+#!/bin/bash
+
+test -r /etc/apt-upchk/notify.conf && . /etc/apt-upchk/notify.conf
+: ${mailto:=root}
+
+upchk="`/usr/sbin/apt-upchk`"
+
+test -z "$upchk" && exit 0
+
+echo "Subject: [`hostname -s`] Updated Package Available
+X-Sender: apt-upchk-notify (`hostname -s`)
+Content-Type: text/plain; charset=us-ascii
+To: `echo "${mailto}" | sed -e 's/^  *//; s/  *$//; s/  */, /g'`
+
+$upchk
+" | /usr/sbin/sendmail $mailto
