@@ -19,6 +19,7 @@ set -e
 
 case "$1" in
     remove)
+    	find /var/lib/apt-upchk/cache -type f | xargs -r rm 
     	find /var/lib/apt-upchk/workroot/var/cache -type f | xargs -r rm 
     	find /var/lib/apt-upchk/workroot/var/lib/apt -type f | xargs -r rm 
         ;;
