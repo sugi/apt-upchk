@@ -12,7 +12,7 @@ if (__FILE__ eq $0) {
     my $rep = AptUpchk::Report::SingleHost->new($dom);
     my $exitcode = 0;
 
-    my %opt = (config => @ARGV && $ARGV[0] || "/etc/apt-upchk/report.conf",
+    our %opt = (config => @ARGV && $ARGV[0] || "/etc/apt-upchk/report.conf",
 	       "report-update-pkg" => 1, "report-hold-pkg" => 1,
 	       "report-security-pkg" => 1, "report-update-error" => 1);
     if ( -r $opt{config} ) {
