@@ -10,7 +10,7 @@
 
 use strict;
 use warnings;
-use lib '/usr/share/apt-upchk/lib';
+#use lib '/usr/share/apt-upchk/lib';
 use AptUpchk;
 use Getopt::Long;
 Getopt::Long::Configure("gnu_getopt");
@@ -26,7 +26,10 @@ $ENV{LC_ALL} = "C";
 
 our %opt = ( config     => "/etc/apt-upchk/upchk.conf",
 	    "no-update" => 0,
+	    "no-cache"  => 0,
 	     format     => "perl",
+	     cache_time => 600, # cache lifetime, default = 10min.
+	     cache      => "/var/lib/apt-upchk/cache/upchk.pl",
 	     workroot   => "/var/lib/apt-upchk/workroot",
 	    "apt-get"   => "/usr/share/apt-upchk/scripts/apt-simulate",
 	   );
@@ -39,6 +42,7 @@ if ( -r $opt{config} ) {
 my %cmdopt;
 GetOptions(\%cmdopt,
 	   "no-update|n",
+	   "no-cache|N",
 	   "apt-get=s",
 	   "format|f=s",
 	   ) or die "\n";
@@ -51,33 +55,40 @@ unless ( -x $opt{"apt-get"} ) {
     die "Can't exec apt-get($opt{'apt-get'}): $!\n";
 }
 
-my $update_out = "";
-my $update_ret = 0;
-
-unless ( $opt{"no-update"} ) {
-    $update_out = `$opt{"apt-get"} -qq update 2>&1`;
-    $update_ret = $? >> 8;
-}
-
-my @upgrade_out = split(/\n/, `$opt{"apt-get"} -u -s upgrade 2>&1`);
-my $upgrade_ret = $?;
-
-
 my $out = {};
-# stack all outout data
-{
+
+if ( !$opt{"no-cache"} && -f $opt{cache} &&
+     time() < ($opt{cache_time} + (stat($opt{cache}))[9]) ){
+    my $ch = IO::File->new($opt{cache}) or die "can't read cache file";
+    my @cache = <$ch>;
+    $ch->close;
+    eval "@cache";
+
+} else {
+
+    my $update_out = "";
+    my $update_ret = 0;
+    unless ( $opt{"no-update"} ) {
+	$update_out = `$opt{"apt-get"} -qq update 2>&1`;
+	$update_ret = $? >> 8;
+    }
+    my @upgrade_out = split(/\n/, `$opt{"apt-get"} -u -s upgrade 2>&1`);
+    my $upgrade_ret = $?;
+
+    # stack data
     $out->{version}  = $AptUpchk::VERSION;
     $out->{hostname} = hostname();
     $out->{unixtime} = time();
     $out->{"update-command"} = { exitcode => $update_ret,
 				 output => $update_out };
 
+    # scan output
     {
 	my $kept_p = 0;
 	my $kept_lines = "";
 	foreach ( @upgrade_out ) {
 	    if ($kept_p) {
-		if (/^ /) {
+		if (/^\s/) {
 		    $kept_lines .= " $_ ";
 		} else {
 		    $kept_p = 0;
@@ -85,7 +96,6 @@ my $out = {};
 	    }
 	    elsif (/^The following packages have been kept back/){
 		$kept_p = 1;
-		$exitcode = 50;
 		$out->{keptbackpkg} = [];
 	    }
 	}
@@ -102,10 +112,7 @@ my $out = {};
     }
 
     my @packages = grep(/^Inst /i, @upgrade_out);
-    if (@packages) {
-	$exitcode = 100;
-	    $out->{updatepkg} = [];
-    }
+    $out->{updatepkg} = [] if (@packages);
     foreach (@packages) {
 	if ( /^Inst (\S+)\s+(?:\[(.*?)\])?\s*\((\S+)(?:\s+(.+?))?\)/ ) {
 	    push @{$out->{updatepkg}},
@@ -118,6 +125,10 @@ my $out = {};
 	    warn "abnormal line was detected: $_\n";
 	}
     }
+
+    my $ch = IO::File->new($opt{cache}, "w");
+    print $ch Data::Dumper->Dump([$out], ["out"]);
+    $ch->close;
 }
 
 if ( $opt{format} eq "perl") {
@@ -130,6 +141,11 @@ if ( $opt{format} eq "perl") {
     die "unknown format: '$opt{format}'\n";
 }
 
+if (@{$out->{updatepkg}}) {
+    $exitcode = 100;
+} elsif (@{$out->{keptbackpkg}}) {
+    $exitcode = 50;
+}
 exit($exitcode);
 
 ## utils
