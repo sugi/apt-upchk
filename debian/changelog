@@ -1,3 +1,10 @@
+apt-upchk (12) stable; urgency=low
+
+  * report: bug fix; normal update was allways ignored
+  * report: all entries of config file will be through 
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Thu, 25 Nov 2004 11:58:37 +0900
+
 apt-upchk (11) stable; urgency=low
 
   * report script supports --mail option 
