@@ -17,11 +17,12 @@ use IO::File;
 
 our $VERSION = "2";
 my $statfh = undef;
+my $exitcode = 0;
 
 $ENV{LANG} = "C";
 $ENV{LC_ALL} = "C";
 
-our %opt = (config   => "/etc/apt-upchk/apt-upchk.conf",
+our %opt = (config   => "/etc/apt-upchk/upchk.conf",
 	    noupdate => 0
 	   );
 
@@ -54,7 +55,33 @@ my $upgrade_ret = $?;
 	"<output><![CDATA[", $update_out,
 	"]]></output></update-command>\n";
 
+    {
+	my $kept_p = 0;
+	my $kept_lines = "";
+	foreach ( @upgrade_out ) {
+	    if ($kept_p) {
+		if (/^ /) {
+		    $kept_lines .= " $_ ";
+		} else {
+		    $kept_p = 0;
+		}
+	    }
+	    elsif (/have been kept back:/){
+		$kept_p = 1;
+		$exitcode = 50;
+	    }
+	}
+	foreach (split /\s+/, $kept_lines) {
+	    $_ eq "" and next;
+	    print "<keptbackpkg>\n",
+		"<name>$_</name>\n",
+		"<current-version>", &get_installed_ver($_), "</current-version>\n",
+		"</keptbackpkg>\n";
+	}
+    }
+
     my @packages = grep(/^Inst /i, @upgrade_out);
+    $exitcode = 100 if @packages;
     foreach (@packages) {
 	if ( /^Inst (\S+)\s+(?:\[(.*?)\])?\s*\((\S+)(?:\s+(.+?))?\)/ ) {
 	    print "<updatepkg>\n",
@@ -70,33 +97,10 @@ my $upgrade_ret = $?;
 	}
     }
 
-    {
-	my $kept_p = 0;
-	my $kept_lines = "";
-	foreach ( @upgrade_out ) {
-	    if ($kept_p) {
-		if (/^ /) {
-		    $kept_lines .= " $_ ";
-		} else {
-		    $kept_p = 0;
-		}
-	    }
-	    elsif (/have been kept back:/){
-		$kept_p = 1;
-	    }
-	}
-	foreach (split /\s+/, $kept_lines) {
-	    $_ eq "" and next;
-	    print "<keptbackpkg>\n",
-		"<name>$_</name>\n",
-		"<current-version>", &get_installed_ver($_), "</current-version>\n",
-		"</keptbackpkg>\n";
-	}
-    }
-
     print "</apt-upchk-report>\n";
 }
 
+exit($exitcode);
 
 ## utils
 sub get_installed_ver($) {
@@ -123,3 +127,4 @@ sub get_installed_ver($) {
     }
     $version;
 }
+
