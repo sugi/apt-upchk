@@ -7,11 +7,19 @@ use warnings;
 use XML::DOM;
 use XML::XQL;
 use XML::XQL::DOM;
-#use Data::Dumper;
+use IO::File;
 
 sub new {
     my $class = shift;
-    my $self  = { doc => shift };
+    my $self;
+    if (@_ == 1) {
+	$self = { doc => shift };
+    } else {
+	$self = { @_ };
+    }
+    unless (exists $self->{output}) {
+	$self->{output} = IO::File->new(">-");
+    }
     bless $self, $class;
 }
 
@@ -62,21 +70,20 @@ sub _get_update_output {
     [__get_first_data($self->{doc}->xql("/apt-upchk-report/update-command/output"))]->[0];
 }
 
-
 sub report {
     my $self = shift;
-    $self->report_update_err   and print "\n";
-    $self->report_security_pkg and print "\n";
-    $self->report_update_pkg   and print "\n";
-    $self->report_hold_pkg     and print "\n";
+    $self->report_update_err   and $self->_msg("\n");
+    $self->report_security_pkg and $self->_msg("\n");
+    $self->report_update_pkg   and $self->_msg("\n");
+    $self->report_hold_pkg     and $self->_msg("\n");
 }
 
 sub report_update_err {
     my $self = shift;
     my $err;
     if ( ($err = $self->_get_update_exitcode) != 0 ) {
-	print "Warning: apt-get update exited with error($err);\n";
-	print $self->_get_update_output;
+	$self->_msg("Warning: apt-get update exited with error($err);\n");
+	$self->_msg($self->_get_update_output);
 	1;
     } else {
 	0;
@@ -86,9 +93,9 @@ sub report_update_err {
 sub report_security_pkg {
     my $self = shift;
     my @pkgs = $self->_get_security_pkg or return 0;
-    print "== SECURITY UPDATES ==\n";
+    $self->_msg("== SECURITY UPDATES ==\n");
     foreach my $pkg ( @pkgs ) {
-	print &__uppkg_fmt($pkg);
+	$self->_msg(&__uppkg_fmt($pkg));
     }
     return 1;
 }
@@ -96,9 +103,9 @@ sub report_security_pkg {
 sub report_update_pkg {
     my $self = shift;
     my @pkgs = $self->_get_update_pkg or return 0;
-    print "== Update Packages ==\n";
+    $self->_msg("== Update Packages ==\n");
     foreach my $pkg ( @pkgs ) {
-	print &__uppkg_fmt($pkg);
+	$self->_msg(&__uppkg_fmt($pkg));
     }
     return 1;
 }
@@ -106,13 +113,18 @@ sub report_update_pkg {
 sub report_hold_pkg {
     my $self = shift;
     my @pkgs = $self->_get_hold_pkg or return 0;
-    print "== holds ageinst update ==\n";
+    $self->_msg("== holds ageinst update ==\n");
     foreach my $pkg ( @pkgs ) {
-	print &__holdpkg_fmt($pkg);
+	$self->_msg(&__holdpkg_fmt($pkg));
     }
     return 1;
 }
 
+sub _msg {
+    my $self = shift;
+    my $fh = $self->{output};
+    print $fh @_;
+}
 
 ###
 
@@ -154,5 +166,8 @@ if (__FILE__ eq $0) {
     use XML::DOM;
     my $dom = XML::DOM::Parser->new->parse(*STDIN);
     my $rep = AptUpchk::Report::SingleHost->new($dom);
+    #$rep->{output} = IO::File->new(">out");
     $rep->report;
 }
+
+1;
