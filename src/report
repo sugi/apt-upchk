@@ -14,7 +14,8 @@ if (__FILE__ eq $0) {
 
     our %opt = (config => @ARGV && $ARGV[0] || "/etc/apt-upchk/report.conf",
 	       "report-update-pkg" => 1, "report-hold-pkg" => 1,
-	       "report-security-pkg" => 1, "report-update-error" => 1);
+	       "report-security-pkg" => 1, "report-update-error" => 1,
+	       "ignore-pkg" => []);
     if ( -r $opt{config} ) {
 	do $opt{config};
 	die "Error in config file: $@\n" if $@;
