@@ -9,6 +9,8 @@ upchkout="`${scriptdir}/upchk`"
 test "$?" == "0" && exit 0
 
 if [ "$mode" != "multi" ]; then
+  # trun around XML::XQL.pm bug...
+  export TERM=dumb
   upchkout=$(echo "$upchkout" | ${scriptdir}/report)
   test "$?" == "0" && exit 0
 fi

@@ -5,6 +5,9 @@ use warnings;
 use lib "/usr/share/apt-upchk/lib";
 use AptUpchk::Notify::Client;
 
+# turn around XML::XQL bug....
+$ENV{TERM}="dumb";
+
 if (__FILE__ eq $0) {
     use IO::File;
     my $infh = IO::File->new("-");
