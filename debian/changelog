@@ -1,3 +1,10 @@
+apt-upchk (11) stable; urgency=low
+
+  * report script supports --mail option 
+  * config keyword has been changed; ignore-* -> exclude-*
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Mon,  8 Nov 2004 18:30:08 +0900
+
 apt-upchk (10) stable; urgency=low
 
   * ad-hoc support; ignore by name
