@@ -153,13 +153,13 @@ sub get_new_pkg_stat ($) {
     $line = <CHE> while $line !~ /^Versions:/;
     $line = <CHE>;
     close(CHE);
-    $ret->{"new-version"} = $line =~ /^(\d[^\d.-]*-\d+)/;
+    ($ret->{"new-version"}) = ($line =~ /^(\d[\d.-]*-\d+)/);
     my @packages = ($line =~ /\(([^()]+)\)/g);
     foreach my $p (@packages) {
 	my $r = $p;
 	$r =~ s/_Packages$/_Release/;
 	if ( -f $r ) {
-	    my %rel = (Label => "", Version => "", Archive => "");
+	    my %rel;
 	    my $rfh = IO::File->new($r);
 	    my $rl;
 	    while ($rl = <$rfh>) {
