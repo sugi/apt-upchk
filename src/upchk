@@ -201,7 +201,8 @@ sub get_new_pkg_stat ($) {
 		    "$rel{Label}:$rel{Archive}";
 	    last;
 	}
-	$ret->{release} = ($p =~ m|.+/([^_]+)|);
+	$p =~ m|([^/_]+)[^/]+$|;
+	$ret->{release} = $1;
     }
     $ret;
 }
