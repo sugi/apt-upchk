@@ -1,3 +1,10 @@
+apt-upchk (16) stable; urgency=low
+
+  * small fix in getting new version of hold packages
+  * fix typo
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Wed, 23 Mar 2005 04:08:08 +0900
+
 apt-upchk (15) stable; urgency=low
 
   * upchk: fix for perl5.6
