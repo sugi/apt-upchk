@@ -55,7 +55,7 @@ unless ( $opt{"no-update"} ) {
     $update_ret = $? >> 8;
 }
 
-my @upgrade_out = split(/\n/, `$opt{"apt-get"} -u -s upgrade 2>&1`);
+my @upgrade_out = split(/\n/, `$opt{"apt-get"} -u -s dist-upgrade 2>&1`);
 my $upgrade_ret = $?;
 
 # output
