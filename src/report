@@ -13,27 +13,27 @@ if (__FILE__ eq $0) {
     my $exitcode = 0;
 
     my %opt = (config => @ARGV && $ARGV[0] || "/etc/apt-upchk/report.conf",
-	       "repot-update-pkg" => 1, "report-hold-pkg" => 1,
-	       "report-security-pkg" => 1, "repot-update-error" => 1);
+	       "report-update-pkg" => 1, "report-hold-pkg" => 1,
+	       "report-security-pkg" => 1, "report-update-error" => 1);
     if ( -r $opt{config} ) {
 	do $opt{config};
 	die "Error in config file: $@\n" if $@;
     }
 
-    $opt{"repot-update-error"}
+    $opt{"report-update-error"}
 	and $rep->report_update_err
 	    and $exitcode = 100
 		and print "\n";
 
-    $opt{"repot-update-pkg"}
+    $opt{"report-update-pkg"}
 	and $rep->report_security_pkg
 	    and $exitcode = 100
 		and print "\n";
-    $opt{"repot-update-pkg"}
+    $opt{"report-update-pkg"}
 	and $rep->report_update_pkg
 	    and $exitcode = 100
 		and	print "\n";
-    $opt{"repot-hold-pkg"}
+    $opt{"report-hold-pkg"}
 	and $rep->report_hold_pkg
 	    and $exitcode = 100
 		and print "\n";
