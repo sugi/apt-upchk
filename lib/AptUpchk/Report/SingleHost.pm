@@ -40,7 +40,7 @@ sub _scan_updates {
 	    next if $self->{"exclude-security"};
 	    push @security, $pkg;
 	} else {
-	    next if exists $self->{"exclude-normal"};
+	    next if $self->{"exclude-normal"};
 	    push @update, $pkg;
 	}
     }
