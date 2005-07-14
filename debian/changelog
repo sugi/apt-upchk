@@ -1,3 +1,9 @@
+apt-upchk (19) stable; urgency=low
+
+  * report: bug fix in --mail option handling.
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Thu, 14 Jul 2005 12:25:47 +0900
+
 apt-upchk (18) stable; urgency=low
 
   * upchk: fix version scanner for native package.
