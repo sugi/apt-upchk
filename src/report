@@ -9,7 +9,8 @@ if (__FILE__ eq $0) {
     my $report_class = "AptUpchk::Report::SingleHost";
 
     if ($ARGV[0] && ($ARGV[0] eq "-m" || $ARGV[0] eq "--mail")) {
-	$report_class =  "AptUpchk::Report::Mail"
+	$report_class =  "AptUpchk::Report::Mail";
+	shift @ARGV;
     }
     eval "use $report_class";
     if ($@) { die "can't load report method '$report_class': $@\n" }
