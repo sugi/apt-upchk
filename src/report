@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 # -*- cperl -*-
 package main;
-#use lib "/usr/share/apt-upchk/lib";
+use lib "/usr/share/apt-upchk/lib";
 use IO::File;
 use YAML ();
 use Getopt::Long;
