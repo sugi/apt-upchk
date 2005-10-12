@@ -1,31 +1,55 @@
 #!/usr/bin/perl
 # -*- cperl -*-
 package main;
-use lib "/usr/share/apt-upchk/lib";
+#use lib "/usr/share/apt-upchk/lib";
+use IO::File;
+use YAML ();
+use Getopt::Long;
+Getopt::Long::Configure qw(gnu_compat);
 
 if (__FILE__ eq $0) {
     use strict;
     use warnings;
     my $report_class = "AptUpchk::Report::SingleHost";
 
-    if ($ARGV[0] && ($ARGV[0] eq "-m" || $ARGV[0] eq "--mail")) {
-	$report_class =  "AptUpchk::Report::Mail";
-	shift @ARGV;
-    }
-    eval "use $report_class";
-    if ($@) { die "can't load report method '$report_class': $@\n" }
+    our %opt = (config => "/etc/apt-upchk/report.conf",
+	        ignore_file => "/etc/apt-upchk/report.ignore",
+	        suppress_file => "/etc/apt-upchk/report.suppress", );
 
-    our %opt = (config => @ARGV && $ARGV[0] || "/etc/apt-upchk/report.conf",
-		"exclude-byname" => [],
-		);
+    unless (GetOptions(\%opt,
+	               qw(mail|m help|h force|f config|c=s
+		          ignore-file|i=s supress-file|s=s))) {
+        &usage;
+	exit(255);
+    }
+
+    if ($opt{help}) {
+	&usage;
+	exit 0;
+    }
+
     if ( -r $opt{config} ) {
 	do $opt{config};
 	die "Error in config file: $@\n" if $@;
     }
+    foreach my $o ( qw(ignore suppress) ){ 
+        if ( -r $opt{"${o}_file"} ) {
+	    my $fh  = IO::File->new($opt{"${o}_file"});
+            my $dat = YAML::Load(join("", <$fh>));
+            $fh and $fh->close;
+	    $opt{$o} = $dat if $dat;
+         }
+    }
+
+    warn "W: 'exclude-byname' has been obsolete. It'll be just ignored.\n" if $opt{"exclude-byname"};
+
+    $report_class = "AptUpchk::Report::Mail" if $opt{mail};
+    eval "use $report_class";
+    if ($@) { die "can't load report method '$report_class': $@\n" }
 
     my $exitcode = 0;
     my $aptupchk;
-    my @data = <STDIN>;
+    my @data = <>;
     eval "@data";
     if ($@) { die "load report fail: $@\n" }
     my $rep = $report_class->new(doc => $aptupchk,
@@ -35,6 +59,18 @@ if (__FILE__ eq $0) {
     $rep->report and $exitcode = 100;
 
     exit($exitcode);
+}
+
+sub usage {
+    print "Usage: $0 [--options]... [datafile]...
+Options:
+  -h, --help                show this message.
+  -m, --mail                report with mail header
+  -f, --force               report all package forcely
+  -c, --config=file         specify config file (Perl format)
+  -i, --ignore-file=file    specify ignore file (YAML format)
+  -s, --suppress-file=file  specify suppress file (YAML format)
+";
 }
 
 1;

@@ -96,23 +96,24 @@ if ( !$opt{"no-cache"} && -f $opt{cache} &&
 	    }
 	    elsif (/^The following packages have been kept back/){
 		$kept_p = 1;
-		$out->{keptbackpkg} = [];
+    		$out->{updatepkg} = [];
 	    }
 	}
 	foreach (split /\s+/, $kept_lines) {
 	    $_ eq "" and next;
 	    my $pstat = &get_new_pkg_stat($_);
-	    push @{$out->{keptbackpkg}},
+	    push @{$out->{updatepkg}},
 		{ name => $_,
 		 "current-version" => &get_installed_ver($_),
 		 "new-version" => $pstat->{"new-version"},
 		  release => $pstat->{release},
+		  uptype => "hold",
 		};
 	}
     }
 
     my @packages = grep(/^Inst /i, @upgrade_out);
-    $out->{updatepkg} = [] if (@packages);
+    $out->{updatepkg} = [] if (@packages && !defined($out->{updatepkg}));
     foreach (@packages) {
 	if ( /^Inst (\S+)\s+(?:\[(.*?)\])?\s*\((\S+)(?:\s+(.+?))?\)/ ) {
 	    push @{$out->{updatepkg}},
@@ -120,15 +121,17 @@ if ( !$opt{"no-cache"} && -f $opt{cache} &&
 		 "current-version" => $2 || &get_installed_ver($1),
 		 "new-version" => $3,
 		  release => $4,
+		  uptype => $4 =~ /-security:/i ? "security" : "normal",
 		};
 	} else {
 	    warn "abnormal line was detected: $_\n";
 	}
     }
 
-    open(CH, "> $opt{cache}");
-    print CH Data::Dumper->Dump([$out], ["out"]);
-    close CH;
+    if (open(CH, "> $opt{cache}")) {
+      print CH Data::Dumper->Dump([$out], ["out"]);
+      close CH;
+    }
 }
 
 if ($opt{format} eq "perl") {
@@ -143,8 +146,6 @@ if ($opt{format} eq "perl") {
 
 if (defined($out->{updatepkg}) && @{$out->{updatepkg}}) {
     $exitcode = 100;
-} elsif (defined($out->{keptbackpkg}) && @{$out->{keptbackpkg}}) {
-    $exitcode = 50;
 }
 exit($exitcode);
 

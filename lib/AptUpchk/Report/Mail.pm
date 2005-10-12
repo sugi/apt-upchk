@@ -14,9 +14,9 @@ sub report {
     my $d = $self->{doc};
     my $sbj = "Subject: [" . $d->{hostname} . "] UpdatePkg;";
 
-    foreach my $p ($self->_get_security_pkg,
-		   $self->_get_update_pkg,
-		   $self->_get_hold_pkg) {
+    foreach my $p ($self->_get_packages("security"),
+		   $self->_get_packages("normal"),
+		   $self->_get_packages("hold")) {
 	my $pname = " " . $p->{name};
 	if (length($sbj)+length($pname) > 75){
 	    $sbj .= "...";
@@ -25,15 +25,17 @@ sub report {
 	$sbj .= $pname;
     }
 
-    $self->_msg("$sbj\n");
-    $self->_msg("Date: " . strftime($timefmt, localtime()) . "\n");
-    $self->_msg("X-Check-Date: " .
-		strftime($timefmt,
-			 localtime($d->{unixtime})) . "\n");
-    $self->_msg("X-Sender: apt-upchk v.$AptUpchk::VERSION (".hostname().")\n");
-    $self->_msg("Content-Type: text/plain; charset=us-ascii\n");
-    $self->_msg("\n");
-    POSIX::setlocale( &POSIX::LC_ALL, $old_loc );
+    if ($self->need_report) {
+        $self->_msg("$sbj\n");
+        $self->_msg("Date: " . strftime($timefmt, localtime()) . "\n");
+        $self->_msg("X-Check-Date: " .
+		    strftime($timefmt,
+			     localtime($d->{unixtime})) . "\n");
+        $self->_msg("X-Sender: apt-upchk v.$AptUpchk::VERSION (".hostname().")\n");
+        $self->_msg("Content-Type: text/plain; charset=us-ascii\n");
+        $self->_msg("\n");
+        POSIX::setlocale( &POSIX::LC_ALL, $old_loc );
+    }
 
     $self->SUPER::report;
 }

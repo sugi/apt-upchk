@@ -1,3 +1,10 @@
+apt-upchk (20) stable; urgency=low
+
+  * add ignore and suppress feature.
+  * exclude-byname has been obsolute.
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Wed, 12 Oct 2005 13:59:07 +0900
+
 apt-upchk (19) stable; urgency=low
 
   * report: bug fix in --mail option handling.

@@ -7,7 +7,6 @@ Standards-Version: 3.6.1.0
 
 Package: apt-upchk
 Architecture: all
-Depends: cron, debconf
-Suggests: libyaml-perl
+Depends: cron, debconf, libyaml-perl, adduser
 Description: package update checker
  apt-upchk checks package updates and report it.

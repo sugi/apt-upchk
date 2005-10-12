@@ -1,0 +1,17 @@
+# 
+# Ignore list for update reporter
+#
+# Listed package will be ignored completely without --force option.
+# You need to use 'suppress' insted of this file if possible.
+#
+# You must write in YAML syntax.
+# All value will be evaluated as regex like /^${val}$/.
+#
+
+- current-version: .*\.0local\d+
+- name: libapache-mod-adbanners
+- name: apache.*
+  release: unofficial
+- name: libapache-.*
+  release: .*unofficial.*
+

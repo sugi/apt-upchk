@@ -1,0 +1,17 @@
+# 
+# Suppress list for update reporter
+#
+# Listed package do NOT become a trigger to send report.
+#
+# You must write in YAML syntax.
+# All value will be evaluated as regex like /^${val}$/.
+#
+
+# report security only for libc6
+- name: libc6.*
+  uptype: normal|hold
+
+- name: mysql.*
+
+# suppress all holded package 
+- uptype: hold
