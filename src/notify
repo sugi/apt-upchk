@@ -3,18 +3,13 @@
 scriptdir=/usr/share/apt-upchk/scripts
 test -r /etc/apt-upchk/notify.conf && . /etc/apt-upchk/notify.conf
 : ${mailto:=root}
-: ${mode=single}
 
-upchkout="`${scriptdir}/upchk`"
+output="`${scriptdir}/upchk`"
 test "$?" == "0" && exit 0
 
-if [ "$mode" != "multi" ]; then
-  # trun around XML::XQL.pm bug...
-  export TERM=dumb
-  upchkout=$(echo "$upchkout" | ${scriptdir}/report --mail)
-  test "$?" == "0" && exit 0
-fi
+output=$(echo "$upchkout" | ${scriptdir}/report --mail $@)
+test "$?" == "0" && exit 0
 
 echo "To: `echo "${mailto}" | sed -e 's/^  *//; s/  *$//; s/  */, /g'`
-$upchkout
+$output
 " | /usr/sbin/sendmail $mailto
