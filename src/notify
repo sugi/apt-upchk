@@ -7,7 +7,7 @@ test -r /etc/apt-upchk/notify.conf && . /etc/apt-upchk/notify.conf
 output="`${scriptdir}/upchk`"
 test "$?" == "0" && exit 0
 
-output=$(echo "$upchkout" | ${scriptdir}/report --mail $@)
+output=$(echo "$output" | ${scriptdir}/report --mail "$@")
 test "$?" == "0" && exit 0
 
 echo "To: `echo "${mailto}" | sed -e 's/^  *//; s/  *$//; s/  */, /g'`
