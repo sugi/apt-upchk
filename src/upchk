@@ -121,7 +121,7 @@ if ( !$opt{"no-cache"} && -f $opt{cache} &&
 		 "current-version" => $2 || &get_installed_ver($1),
 		 "new-version" => $3,
 		  release => $4,
-		  uptype => $4 =~ /-security:/i ? "security" : "normal",
+		  uptype => &{sub{$_ =~ /-security:/i ? "security" : "normal"}}($4),
 		};
 	} else {
 	    warn "abnormal line was detected: $_\n";

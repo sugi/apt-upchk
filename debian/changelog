@@ -1,3 +1,10 @@
+apt-upchk (21) stable; urgency=low
+
+  * Small bugfix for perl 5.8.4 on sarge.
+  * Version 20 has been completely broken. Do not use!
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Thu, 13 Oct 2005 18:08:25 +0900
+
 apt-upchk (20) stable; urgency=low
 
   * add ignore and suppress feature.
