@@ -1,3 +1,9 @@
+apt-upchk (22) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Thu, 13 Oct 2005 18:11:08 +0900
+
 apt-upchk (21) stable; urgency=low
 
   * Small bugfix for perl 5.8.4 on sarge.
