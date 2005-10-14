@@ -186,24 +186,25 @@ sub get_new_pkg_stat ($) {
     ($ret->{"new-version"}) = ($line =~ /^([\d.+:a-zA-Z-]+)/);
     my @packages = ($line =~ /\(([^()]+)\)/g);
     foreach my $p (@packages) {
-	my $r = $p;
-	$r =~ s/_Packages$/_Release/;
-	if ( -f $r ) {
-	    my %rel;
-	    my $rfh = IO::File->new($r);
+	my $relfile = $p;
+	$relfile =~ s/_([^_]+_binary-[^_]+|\.)_Packages$/_Release/;
+	if ( -f $relfile ) {
+	    my %rel = (archive => "", version => "", suite => "");
+	    my $rfh = IO::File->new($relfile);
 	    my $rl;
 	    while ($rl = <$rfh>) {
 		$rl =~ /^([^:]+):\s+(.*)/;
-		$rel{$1} = $2;
+		$rel{lc($1)} = $2;
 	    }
-	    $rfh->close;
-	    $ret->{release} = defined($rel{Version}) ?
-		"$rel{Label}:$rel{Version}/$rel{Archive}" :
-		    "$rel{Label}:$rel{Archive}";
+	    $rfh and $rfh->close;
+	    my $r = ($rel{version} ? "$rel{version}/": "")
+	            . ($rel{suite} ? $rel{suite} : $rel{archive});
+	    $ret->{release} = $rel{label} . ($r ? ":$r" : "");
 	    last;
-	}
-	$p =~ m|([^/_]+)[^/]+$|;
-	$ret->{release} = $1;
+	} else {
+	    $p =~ m|([^/_]+)[^/]+$|;
+	    $ret->{release} = $1;
+        }
     }
     $ret;
 }
