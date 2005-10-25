@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -I/usr/share/apt-upchk/lib
 # -*- cperl -*-
 
 #
@@ -10,7 +10,6 @@
 
 use strict;
 use warnings;
-use lib '/usr/share/apt-upchk/lib';
 use AptUpchk;
 use Getopt::Long;
 Getopt::Long::Configure("gnu_getopt");
