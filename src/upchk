@@ -160,7 +160,8 @@ sub get_installed_ver($) {
     seek($statfh, 0, 0);
   LOOP:
     while ( $line = <$statfh> ) {
-	if ($line =~ /^Package:\s+${pkg}$/) {
+	my $pkgregex = '^Package:\s+'.quotemeta($pkg).'$';
+	if ($line =~ /$pkgregex/) {
 	    while ( $line = <$statfh> ) {
 		if ($line =~ /^Version:\s+(.*)$/) {
 		    $version = $1;
