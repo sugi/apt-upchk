@@ -1,6 +1,5 @@
-apt-upchk (22) UNRELEASED; urgency=low
+apt-upchk (22) stable; urgency=low
 
-  * NOT RELEASED YET
   * upchk: fix in getting version of hold packages.
   * upchk: fix regex in getting installed version.
 
