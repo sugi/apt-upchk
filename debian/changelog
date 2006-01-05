@@ -1,3 +1,9 @@
+apt-upchk (23) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Mon, 26 Dec 2005 06:17:43 +0900
+
 apt-upchk (22) stable; urgency=low
 
   * upchk: fix in getting version of hold packages.

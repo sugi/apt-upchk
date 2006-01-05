@@ -1,0 +1,2 @@
+etc/apt var/lib/apt-upchk/workroot/etc/apt
+var/lib/dpkg/status var/lib/apt-upchk/workroot/var/lib/dpkg/status

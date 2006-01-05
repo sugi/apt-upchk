@@ -15,3 +15,6 @@
 
 # suppress all holded package 
 - uptype: hold
+
+# supress all unstable package
+- release: Debian:unstable

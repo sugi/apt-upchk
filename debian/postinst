@@ -19,13 +19,21 @@ set -e
 
 case "$1" in
     configure)
+      . /usr/share/debconf/confmodule
+
       id aptupchk > /dev/null 2>&1 || adduser --system --no-create-home --disabled-password aptupchk
       chown aptupchk -R /var/lib/apt-upchk/workroot
       chown aptupchk -R /var/lib/apt-upchk/cache
 
+      if [ "$2" = 22 ]; then
+	# purge old dir
+	test -d /var/lib/apt-upchk/workroot/etc/apt && \
+	  rm -rf /var/lib/apt-upchk/workroot/etc/apt
+	ln -s /etc/apt /var/lib/apt-upchk/workroot/etc
+      fi
+
       notifyconf=/etc/apt-upchk/notify.conf
 
-      . /usr/share/debconf/confmodule
       if ( test ! -r $notifyconf || grep -q "DO NOT MODIFY" $notifyconf); then
 
         echo "# AUTOMATICALLY GENARATED. DO NOT MODIFY THIS." > $notifyconf
