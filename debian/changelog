@@ -1,6 +1,7 @@
-apt-upchk (23) UNRELEASED; urgency=low
+apt-upchk (23) stable; urgency=low
 
-  * NOT RELEASED YET
+  * change /var/lib/apt-upchk/workroot/etc/apt as symlink.
+    Now, apt-simulate supports full features of apt.
 
  -- Tatsuki Sugiura <sugi@nemui.org>  Mon, 26 Dec 2005 06:17:43 +0900
 
