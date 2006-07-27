@@ -5,7 +5,7 @@
 # You need to use 'suppress' insted of this file if possible.
 #
 # You must write in YAML syntax.
-# All value will be evaluated as regex like /^${val}$/.
+# All values will be evaluated as regex, like /^${val}$/.
 #
 # You can find example in /usr/share/doc/apt-upchk/examples/report.ignore
 #

@@ -4,7 +4,7 @@
 # Listed package do NOT become a trigger to send report.
 #
 # You must write in YAML syntax.
-# All value will be evaluated as regex like /^${val}$/.
+# All values will be evaluated as regex, like /^${val}$/.
 #
 # You can find example in /usr/share/doc/apt-upchk/examples/report.supress
 #
