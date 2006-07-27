@@ -39,12 +39,17 @@ if ( -r $opt{config} ) {
 }
 
 my %cmdopt;
-GetOptions(\%cmdopt,
-	   "no-update|n",
-	   "no-cache|N",
-	   "apt-get=s",
-	   "format|f=s",
-	   ) or die "\n";
+my $getoptret = GetOptions(\%cmdopt,
+			   "no-update|n",
+			   "no-cache|N",
+			   "apt-get=s",
+			   "format|f=s",
+			   "help|h",
+			   );
+if (!$getoptret || $cmdopt{help}) {
+    &usage();
+    exit($getoptret ? 0 : 1);
+}
 
 foreach my $o (keys %cmdopt) {
     $opt{$o} = $cmdopt{$o};
@@ -207,4 +212,14 @@ sub get_new_pkg_stat ($) {
         }
     }
     $ret;
+}
+
+sub usage {
+    print "Usage: $0 [options]
+Options:
+ -h --help                 show this message
+ -n --no-update            skip apt-get update, use current cache
+ -N --no-cache             do not use cache, force update
+ -f --format=<perl|yaml>   specify output format (default: perl)
+";
 }
