@@ -25,11 +25,12 @@ case "$1" in
       chown aptupchk -R /var/lib/apt-upchk/workroot
       chown aptupchk -R /var/lib/apt-upchk/cache
 
-      if [ "$2" = 22 ]; then
+      if [ "$2" -ge 22 ]; then
 	# purge old dir
-	test -d /var/lib/apt-upchk/workroot/etc/apt && \
+	if [ -d /var/lib/apt-upchk/workroot/etc/apt ]; then
 	  rm -rf /var/lib/apt-upchk/workroot/etc/apt
-	ln -s /etc/apt /var/lib/apt-upchk/workroot/etc
+	  ln -s /etc/apt /var/lib/apt-upchk/workroot/etc
+	fi
       fi
 
       notifyconf=/etc/apt-upchk/notify.conf
