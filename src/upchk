@@ -190,26 +190,32 @@ sub get_new_pkg_stat ($) {
     close(CHE);
     ($ret->{"new-version"}) = ($line =~ /^([\d.+:a-zA-Z-]+)/);
     my @packages = ($line =~ /\(([^()]+)\)/g);
+  FINDREL:
     foreach my $p (@packages) {
-	my $relfile = $p;
-	$relfile =~ s/_([^_]+_binary-[^_]+|\.)_Packages$/_Release/;
-	if ( -f $relfile ) {
-	    my %rel = (archive => "", version => "", suite => "");
-	    my $rfh = IO::File->new($relfile);
-	    my $rl;
-	    while ($rl = <$rfh>) {
-		$rl =~ /^([^:]+):\s+(.*)/;
-		$rel{lc($1)} = $2;
-	    }
-	    $rfh and $rfh->close;
-	    my $r = ($rel{version} ? "$rel{version}/": "")
+	$p =~ m|([^/_]+)[^/]+$|;
+	$ret->{release} = $1;
+
+	my @relfiles;
+	$p =~ m/^(.*?)_([^_]+_binary-[^_]+|\.)_Packages$/;
+	push @relfiles, "${1}_${2}_Release";
+	push @relfiles, "${1}_Release";
+	print STDERR join("\n",@relfiles),"\n";
+	foreach my $relfile ( @relfiles ) {
+	    if ( -f $relfile ) {
+		my %rel = (archive => "", version => "", suite => "");
+		my $rfh = IO::File->new($relfile);
+		my $rl;
+		while ($rl = <$rfh>) {
+		    $rl =~ /^([^:]+):\s+(.*)/;
+		    $rel{lc($1)} = $2;
+		}
+		$rfh and $rfh->close;
+		my $r = ($rel{version} ? "$rel{version}/": "")
 	            . ($rel{suite} ? $rel{suite} : $rel{archive});
-	    $ret->{release} = $rel{label} . ($r ? ":$r" : "");
-	    last;
-	} else {
-	    $p =~ m|([^/_]+)[^/]+$|;
-	    $ret->{release} = $1;
-        }
+		$ret->{release} = $rel{label} . ($r ? ":$r" : "");
+		last FINDREL;
+	    }
+	}
     }
     $ret;
 }
