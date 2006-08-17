@@ -199,7 +199,6 @@ sub get_new_pkg_stat ($) {
 	$p =~ m/^(.*?)_([^_]+_binary-[^_]+|\.)_Packages$/;
 	push @relfiles, "${1}_${2}_Release";
 	push @relfiles, "${1}_Release";
-	print STDERR join("\n",@relfiles),"\n";
 	foreach my $relfile ( @relfiles ) {
 	    if ( -f $relfile ) {
 		my %rel = (archive => "", version => "", suite => "");

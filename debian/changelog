@@ -1,3 +1,9 @@
+apt-upchk (25) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Thu, 17 Aug 2006 12:27:21 +0900
+
 apt-upchk (24) stable; urgency=low
 
   * fix postinst for making symlink for etc/apt
