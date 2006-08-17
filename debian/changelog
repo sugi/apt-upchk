@@ -1,3 +1,9 @@
+apt-upchk (26) stable; urgency=low
+
+  * fix in postfinst: change workroot/etc/apt to symlink forcely
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Thu, 17 Aug 2006 12:34:21 +0900
+
 apt-upchk (25) stable; urgency=low
 
   * remove debug print...
