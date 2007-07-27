@@ -1,3 +1,16 @@
+apt-upchk (28) stable; urgency=medium
+
+  * fix version scanning pattern, now supports '~' and others.
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Fri, 27 Jul 2007 16:13:14 +0900
+
+apt-upchk (27) stable; urgency=low
+
+  * Fix for warnings when using unofficial apt source.
+  * Fix typo in config example.
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Fri, 13 Apr 2007 13:13:50 +0900
+
 apt-upchk (26) stable; urgency=low
 
   * fix in postfinst: change workroot/etc/apt to symlink forcely

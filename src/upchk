@@ -188,7 +188,7 @@ sub get_new_pkg_stat ($) {
     $line = <CHE> while $line !~ /^Versions:/;
     $line = <CHE>;
     close(CHE);
-    ($ret->{"new-version"}) = ($line =~ /^([\d.+:a-zA-Z-]+)/);
+    ($ret->{"new-version"}) = ($line =~ /^(\S+)/);
     my @packages = ($line =~ /\(([^()]+)\)/g);
   FINDREL:
     foreach my $p (@packages) {
@@ -196,9 +196,11 @@ sub get_new_pkg_stat ($) {
 	$ret->{release} = $1;
 
 	my @relfiles;
-	$p =~ m/^(.*?)_([^_]+_binary-[^_]+|\.)_Packages$/;
-	push @relfiles, "${1}_${2}_Release";
-	push @relfiles, "${1}_Release";
+	my @file_part = split('_', $p);
+	shift @file_part;
+	push @relfiles, join("_", @file_part, "Release");
+	shift @file_part;
+	push @relfiles, join("_", @file_part, "Release");
 	foreach my $relfile ( @relfiles ) {
 	    if ( -f $relfile ) {
 		my %rel = (archive => "", version => "", suite => "");
