@@ -1,3 +1,9 @@
+apt-upchk (29) stable; urgency=low
+
+  * bugfix: way to get holded package version and release name.
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Sat, 28 Jul 2007 21:14:58 +0900
+
 apt-upchk (28) stable; urgency=medium
 
   * fix version scanning pattern, now supports '~' and others.
