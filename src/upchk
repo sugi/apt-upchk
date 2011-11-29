@@ -21,16 +21,17 @@ my $statfh = undef;
 my $exitcode = 0;
 
 $ENV{LANG} = "C";
-$ENV{LC_ALL} = "C";
+$ENV{LC_MESSAGES} = "C";
 
-our %opt = ( config     => "/etc/apt-upchk/upchk.conf",
-	    "no-update" => 0,
-	    "no-cache"  => 0,
-	     format     => "perl",
-	     cache_time => 600, # cache lifetime, default = 10min.
-	     cache      => "/var/lib/apt-upchk/cache/upchk.pl",
-	     workroot   => "/var/lib/apt-upchk/workroot",
-	    "apt-get"   => "/usr/share/apt-upchk/scripts/apt-simulate",
+our %opt = ( config        => "/etc/apt-upchk/upchk.conf",
+	    "no-update"    => 0,
+	    "no-cache"     => 0,
+	     format        => "perl",
+	     cache_time    => 600,  # cache lifetime, default = 10min.
+	     "apt-timeout" => 3600, # apt-simulate timeout, default = 1hour.
+	     cache         => "/var/lib/apt-upchk/cache/upchk.pl",
+	     workroot      => "/var/lib/apt-upchk/workroot",
+	    "apt-get"      => "/usr/share/apt-upchk/scripts/apt-simulate",
 	   );
 
 if ( -r $opt{config} ) {
@@ -72,12 +73,21 @@ if ( !$opt{"no-cache"} && -f $opt{cache} &&
 
     my $update_out = "";
     my $update_ret = 0;
-    unless ( $opt{"no-update"} ) {
-	$update_out = `$opt{"apt-get"} -qq update 2>&1`;
-	$update_ret = $? >> 8;
-    }
-    my @upgrade_out = split(/\n/, `$opt{"apt-get"} -u -s upgrade 2>&1`);
-    my $upgrade_ret = $?;
+    my @upgrade_out = ();
+    my $upgrade_ret = 0;
+    eval {
+	# TODO: I need to kill timeouted process...
+	local $SIG{ALRM} = sub { die "apt timeouted!\n" };
+	alarm $opt{"apt-timeout"};
+	unless ( $opt{"no-update"} ) {
+	    $update_out = `$opt{"apt-get"} -qq update 2>&1`;
+	    $update_ret = $? >> 8;
+	}
+	@upgrade_out = split(/\n/, `$opt{"apt-get"} -u -s upgrade 2>&1`);
+	$upgrade_ret = $?;
+	alarm 0;
+    };
+    $@ and die("$@output: $update_out\n".join("\n", @upgrade_out, ''));
 
     # stack data
     $out->{version}  = $AptUpchk::VERSION;
@@ -212,6 +222,7 @@ sub get_new_pkg_stat ($) {
 		    $rel{lc($1)} = $2;
 		}
 		$rfh and $rfh->close;
+		exists($rel{label}) or next;
 		my $r = ($rel{version} ? "$rel{version}/": "")
 	            . ($rel{suite} ? $rel{suite} : $rel{archive});
 		$ret->{release} = $rel{label} . ($r ? ":$r" : "");
