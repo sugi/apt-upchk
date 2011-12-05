@@ -1,3 +1,10 @@
+apt-upchk (31) stable; urgency=medium
+
+  * Support signature verify; add a script to sync GPG keys in /etc/apt.
+  * Transit to po-debconf.
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Tue, 29 Nov 2011 18:45:32 +0900
+
 apt-upchk (30) stable; urgency=low
 
   * Check release file without lebel metadata to avoid warnings.

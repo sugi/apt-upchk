@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ `id -u` != "0" ]; then
+	echo "You need to run this script as root.";
+	exit 1
+fi
+
+for key in /etc/apt/*.gpg /etc/apt/trusted.gpg.d/*.gpg; do
+	test -f "$key" || continue
+	install -p -o aptupchk -m 600 "$key" "/var/lib/apt-upchk/gpg/${key#/etc/apt/}"
+done
+
+for key in /var/lib/apt-upchk/gpg/*.gpg /var/lib/apt-upchk/gpg/trusted.gpg.d/*.gpg; do
+	test -f "/etc/apt/${key#/var/lib/apt-upchk/gpg/}" && continue
+	rm -f "$key"
+done
