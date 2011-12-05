@@ -1,4 +1,4 @@
-apt-upchk (31) stable; urgency=low
+apt-upchk (31) stable; urgency=medium
 
   * Support signature verify; add a script to sync GPG keys in /etc/apt.
   * Transit to po-debconf.
