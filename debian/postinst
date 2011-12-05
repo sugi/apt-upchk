@@ -24,6 +24,14 @@ case "$1" in
       id aptupchk > /dev/null 2>&1 || adduser --system --no-create-home --disabled-password aptupchk
       chown aptupchk -R /var/lib/apt-upchk/workroot
       chown aptupchk -R /var/lib/apt-upchk/cache
+      chown aptupchk -R /var/lib/apt-upchk/gpg
+
+      /usr/share/apt-upchk/scripts/sync-keys
+      
+      # change home dir of aptupchk (31-)
+      if [ ~aptupchk != "/var/lib/apt-upchk" ]; then
+	usermod --home /var/lib/apt-upchk aptupchk
+      fi
 
 	# purge old dir (23-)
 	if [ -d /var/lib/apt-upchk/workroot/etc/apt ]; then

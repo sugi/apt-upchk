@@ -2,11 +2,11 @@ Source: apt-upchk
 Section: admin
 Priority: optional
 Maintainer: Tatsuki Sugiura <sugi@nemui.org>
-Build-Depends: debhelper (>= 4.0.0), cdbs (>= 0.4.26-2)
+Build-Depends: debhelper (>= 4.0.0), cdbs (>= 0.4.26-2), po-debconf
 Standards-Version: 3.7.2
 
 Package: apt-upchk
 Architecture: all
-Depends: cron, debconf, libyaml-perl, adduser
+Depends: cron, debconf, libyaml-perl, adduser, ${misc:Depends}
 Description: simple package update checker
  apt-upchk checks update of packages, and reports by mail.
