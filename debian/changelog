@@ -1,3 +1,9 @@
+apt-upchk (32) stable; urgency=low
+
+  * Fix cron entry for key sync script.
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Fri, 16 Dec 2011 02:33:17 +0900
+
 apt-upchk (31) stable; urgency=medium
 
   * Support signature verify; add a script to sync GPG keys in /etc/apt.
