@@ -12,7 +12,6 @@ install/apt-upchk::
 	mkdir -p $(TARGETDIR)/usr/share/apt-upchk
 	cp -a lib $(TARGETDIR)/usr/share/apt-upchk
 	mkdir -p $(TARGETDIR)/var/lib/apt-upchk/cache
-	mkdir -p $(TARGETDIR)/var/lib/apt-upchk/gpg/trusted.gpg.d
 	cp -a workroot $(TARGETDIR)/var/lib/apt-upchk
 
 clean::

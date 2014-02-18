@@ -3,7 +3,7 @@ Section: admin
 Priority: optional
 Maintainer: Tatsuki Sugiura <sugi@nemui.org>
 Build-Depends: debhelper (>= 4.0.0), cdbs (>= 0.4.26-2), po-debconf
-Standards-Version: 3.9.2
+Standards-Version: 3.9.5
 
 Package: apt-upchk
 Architecture: all
