@@ -165,7 +165,7 @@ exit($exitcode);
 
 ## utils
 sub get_installed_ver($) {
-    my $pkg = shift;
+    my $pkg = [split ':', shift]->[0];
     my $version = undef;
     unless ( $statfh ) {
 	$statfh = IO::File->new("/var/lib/dpkg/status");

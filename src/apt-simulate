@@ -3,16 +3,7 @@
 upchk_dir=/var/lib/apt-upchk
 workroot=${upchk_dir}/workroot
 
-for key in /etc/apt/*.gpg /etc/apt/trusted.gpg.d/*.gpg; do
-	test \! -f "$key" && continue
-	copy=${upchk_dir}/gpg/${key#/etc/apt/}
-	test \! "$key" -nt "$copy" -a \! "$key" -ot "$copy" && continue
-	echo -e "W: GPG key/db '$key' is not synced yet. You may run '/usr/share/apt-upchk/scripts/sync-keys'.\n" >&2
-done
-
-exec apt-get \
+exec apt-get --allow-unauthenticated \
   -o Dir=${workroot} \
   -o Dir::State::status=${workroot}/var/lib/dpkg/status \
-  -o Dir::Etc::trusted=${upchk_dir}/gpg/trusted.gpg \
-  -o Dir::Etc::trustedparts=${upchk_dir}/gpg/trusted.gpg.d \
   "$@"

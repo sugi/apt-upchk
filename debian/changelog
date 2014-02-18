@@ -1,3 +1,15 @@
+apt-upchk (34) stable; urgency=medium
+
+  * Multi-Arch package name support (ad-hoc).
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Wed, 19 Feb 2014 05:15:51 +0900
+
+apt-upchk (33) stable; urgency=medium
+
+  * Remove key sync! just use --allow-unauthenticated option on apt-simplate
+
+ -- Tatsuki Sugiura <sugi@nemui.org>  Tue, 18 Feb 2014 17:46:42 +0900
+
 apt-upchk (32) stable; urgency=low
 
   * Fix cron entry for key sync script.
